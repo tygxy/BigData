@@ -44,9 +44,11 @@ val sc = new SparkContext(conf)
 
 ## 3. Spark Streaming
 
-## 4. Spark SQL
+## 4. Spark SQL, DataFrames and Datasets Guide
 
 ### 4.1 概述
+- 无论使用SQL，DF API，DS API，底层执行引擎相同
+- SQL,执行SQL语句会返还DF/DS
 - Dataset是一个分布式数据集合，DataFrame是一个Dataset组织成的指定列，相当与表
 
 ### 4.2 入门指南
