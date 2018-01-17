@@ -201,7 +201,7 @@ for line in result:
 	- shuffle计算引擎分为HashShuffleManager和SortShuffleManager，区别在于前者会产生大量中间磁盘文件，进而由大量的磁盘IO操作影响了性能；后者会合并成一个磁盘文件，在下一个Stage中的Shuffle Read拉数据时，可以索引部分数据即可
 	
 
-# Spark Official Document
+# 《Spark Official Document》
 
 ## 1.快速入门
 
@@ -366,5 +366,58 @@ val jdbcDF = spark.read
 
 
 
+# 《以慕课网日志分析为例 进入大数据Spark SQL的世界》
+## 1.初探大数据
+- hadoop包括HDFS，yarn(资源调度)，mapreduce
+- hdfs 
+   - NN：
+  1）负责客户端请求的响应
+  2）负责元数据（文件的名称、副本系数、Block存放的DN）的管理
+   - DN：
+  1）存储用户的文件对应的数据块(Block)
+  2）要定期向NN发送心跳信息，汇报本身及其所有的block信息，健康状况
+- yarn
+   - ResourceManager的职责：一个集群active状态的RM只有一个，负责整个集群的资源管理和调度
+     1）处理客户端的请求(启动/杀死)
+     2）启动/监控ApplicationMaster(一个作业对应一个AM)
+     3）监控NM
+     4）系统的资源分配和调度
+   - NodeManager：整个集群中有N个，负责单个节点的资源管理和使用以及task的运行情况
+        1）定期向RM汇报本节点的资源使用请求和各个Container的运行状态
+        2）接收并处理RM的container启停的各种命令
+        3）单个节点的资源管理和任务管理
+   - ApplicationMaster：每个应用/作业对应一个，负责应用程序的管理
+        1）数据切分
+        2）为应用程序向RM申请资源(container)，并分配给内部任务
+        3）与NM通信以启停task， task是运行在container中的
+        4）task的监控和容错
+   - YARN执行流程
+        1）用户向YARN提交作业
+        2）RM为该作业分配第一个container(AM)
+        3）RM会与对应的NM通信，要求NM在这个container上启动应用程序的AM
+        4) AM首先向RM注册，然后AM将为各个任务申请资源，并监控运行情况
+        5）AM采用轮训的方式通过RPC协议向RM申请和领取资源
+        6）AM申请到资源以后，便和相应的NM通信，要求NM启动任务
+        7）NM启动我们作业对应的task
+       
+## 2.Spark及其生态圈概述
+- MapReduce的局限性：
+        1）代码繁琐；
+        2）只能够支持map和reduce方法；
+        3）执行效率低下，中间数据要落磁盘；
+        4）不适合迭代多次、交互式、流式的处理；
+        
+## 3.DataFrame和DataSet
+- 概念
+    - A Dataset is a distributed collection of data：分布式的数据集
+    - A DataFrame is a Dataset organized into named columns. （RDD With schema）以列（列名、列的类型、列值）的形式构成的分布式数据集，按照列赋予不同的名称
+- API
+    - printSchema,select,filter,show,groupBy,count,sort,take
+    - DataFrame和RDD互操作的两种方式：
+            1）反射：case class   前提：事先需要知道你的字段、字段类型    
+            2）编程：Row          如果第一种情况不能满足你的要求（事先不知道列）
 
+
+
+# 《Spark Streaming实时流处理项目实战》
 
