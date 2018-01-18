@@ -420,4 +420,126 @@ val jdbcDF = spark.read
 
 
 # 《Spark Streaming实时流处理项目实战》
+## 1.初识实时流处理
+- 主流实时流处理框架：Storm,Spark Streaming,Kafka,Flink
+- 实时流式处理框架 app/web -> webServer -> Flume -> Kafka -> Storm/Spark -> RDBMS/NoSQL
+
+## 2.分布式日志收集框架Flume
+- Flume是分布式的日志收集，聚合，移动系统
+- Flume架构及核心组件  agent:source(收集),channel(聚集，缓存),sink（输出）
+- 安装过程
+```
+安装jdk
+	下载
+	解压到~/app
+	将java配置系统环境变量中: ~/.bash_profile	
+		export JAVA_HOME=/home/hadoop/app/jdk1.8.0_144
+		export PATH=$JAVA_HOME/bin:$PATH
+	source下让其配置生效
+	检测: java  -version
+
+安装Flume
+	下载
+	解压到~/app
+	将java配置系统环境变量中: ~/.bash_profile	
+		export FLUME_HOME=/home/hadoop/app/apache-flume-1.6.0-cdh5.7.0-bin
+		export PATH=$FLUME_HOME/bin:$PATH
+	source下让其配置生效	
+	flume-env.sh的配置：export JAVA_HOME=/home/hadoop/app/jdk1.8.0_144
+	检测: flume-ng version
+```
+- Flume的使用
+	- 需要配置source,channel,sink,再把三个串起来
+	- a1: agent名称 r1: source的名称 k1: sink的名称 c1: channel的名称
+	- 例子1：从指定网络端口收集数据输出到控制台
+	```
+	// 配置文件例子
+
+	# Name the components on this agent
+	a1.sources = r1
+	a1.sinks = k1
+	a1.channels = c1
+
+	# Describe/configure the source
+	a1.sources.r1.type = netcat
+	a1.sources.r1.bind = localhost
+	a1.sources.r1.port = 44444
+
+	# Describe the sink
+	a1.sinks.k1.type = logger
+
+	# Use a channel which buffers events in memory
+	a1.channels.c1.type = memory
+
+	# Bind the source and sink to the channel
+	a1.sources.r1.channels = c1
+	a1.sinks.k1.channel = c1
+
+	// 启动agent
+	flume-ng agent --name a1 --conf $FLUME_HOME/conf --conf-file $FLUME_HOME/conf/example.conf -Dflume.root.logger=INFO,console
+	```
+	- 例子2：A服务器的日志实时采集到B服务器
+	```
+	// 两份conf配置
+    // 配置一
+	exec-memory-avro.conf
+
+	exec-memory-avro.sources = exec-source
+	exec-memory-avro.sinks = avro-sink
+	exec-memory-avro.channels = memory-channel
+
+	exec-memory-avro.sources.exec-source.type = exec
+	exec-memory-avro.sources.exec-source.command = tail -F /home/hadoop/data/data.log
+	exec-memory-avro.sources.exec-source.shell = /bin/sh -c
+
+	exec-memory-avro.sinks.avro-sink.type = avro
+	exec-memory-avro.sinks.avro-sink.hostname = hadoop000
+	exec-memory-avro.sinks.avro-sink.port = 44444
+
+	exec-memory-avro.channels.memory-channel.type = memory
+
+	exec-memory-avro.sources.exec-source.channels = memory-channel
+	exec-memory-avro.sinks.avro-sink.channel = memory-channel
+ 
+    // 配置二
+    avro-memory-logger.conf
+
+	avro-memory-logger.sources = avro-source
+	avro-memory-logger.sinks = logger-sink
+	avro-memory-logger.channels = memory-channel
+
+	avro-memory-logger.sources.avro-source.type = avro
+	avro-memory-logger.sources.avro-source.bind = hadoop000
+	avro-memory-logger.sources.avro-source.port = 44444
+
+	avro-memory-logger.sinks.logger-sink.type = logger
+
+	avro-memory-logger.channels.memory-channel.type = memory
+
+	avro-memory-logger.sources.avro-source.channels = memory-channel
+	avro-memory-logger.sinks.logger-sink.channel = memory-channel
+
+	// 启动agent
+
+	//先启动avro-memory-logger
+	flume-ng agent \
+	--name avro-memory-logger  \
+	--conf $FLUME_HOME/conf  \
+	--conf-file $FLUME_HOME/conf/avro-memory-logger.conf \
+	-Dflume.root.logger=INFO,console
+
+    // 再启动exec-memory-avro.conf
+	flume-ng agent \
+	--name exec-memory-avro  \
+	--conf $FLUME_HOME/conf  \
+	--conf-file $FLUME_HOME/conf/exec-memory-avro.conf \
+	-Dflume.root.logger=INFO,console
+	```
+- event是flume数据传输的基本单元，由可选的header+ byte array构成，例如Event: { headers:{} body: 68 65 6C 6C 6F 0D hello.}
+
+
+
+
+
+
 
