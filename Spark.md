@@ -622,7 +622,8 @@ val jdbcDF = spark.read
 	-Dflume.root.logger=INFO,console
 
 	```
-	- 启动一个消费者监听hello_topic  kafka-console-consumer.sh --zookeeper hadoop000:2181 --topic hello_topic 
+	- 启动一个消费者监听hello_topic  
+	       - kafka-console-consumer.sh --zookeeper hadoop000:2181 --topic hello_topic 
 
 - 安装HBase
 	- 配置conf/hbase-env.sh 中java地址和修改HBASE_MANAGES_ZK=false
