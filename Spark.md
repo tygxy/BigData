@@ -544,7 +544,7 @@ val jdbcDF = spark.read
 	- broker：一个kafka
 	- topic：主题，给消息一个标签
 
-- 安排配置kafka
+- 安装配置kafka
 	- 安装zookeeper,配置环境变量，修改conf/zk-cfg中的dataDir
 	- 安装kafka,配置环境变量,修改config/server.properties中的broker.id,listeners,host.name,log.dirs,zookeeper.connect
 
@@ -624,7 +624,28 @@ val jdbcDF = spark.read
 	```
 	- 启动一个消费者监听hello_topic  kafka-console-consumer.sh --zookeeper hadoop000:2181 --topic hello_topic 
 
+- 安装HBase
+	- 配置conf/hbase-env.sh 中java地址和修改HBASE_MANAGES_ZK=false
+	- 配置conf/hbase-xml
+	```
+	<configuration>
+        <property>
+            <name>hbase.rootdir</name>
+            <value>hdfs://localhost:8020/hbase</value>
+        </property>
 
+        <property>
+            <name>hbase.cluster.distributed</name>
+            <value>true</value>
+        </property>
+
+        <property>
+            <name>hbase.zookeeper.quorum</name>
+            <value>localhost:2181</value>
+        </property>
+	</configuration>
+	```
+	- 配置conf/regionservers改为localhost
 
 
 
