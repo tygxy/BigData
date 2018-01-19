@@ -537,7 +537,92 @@ val jdbcDF = spark.read
 	```
 - event是flume数据传输的基本单元，由可选的header+ byte array构成，例如Event: { headers:{} body: 68 65 6C 6C 6F 0D hello.}
 
+## 3.分布式消息队列Kafka
+- kafka架构,可以运行在集群中
+	- producer:生产者
+	- consumer:消费者
+	- broker：一个kafka
+	- topic：主题，给消息一个标签
 
+- 安排配置kafka
+	- 安装zookeeper,配置环境变量，修改conf/zk-cfg中的dataDir
+	- 安装kafka,配置环境变量,修改config/server.properties中的broker.id,listeners,host.name,log.dirs,zookeeper.connect
+
+- 单节点单broker的部署和使用
+	- 启动kafka kafka-server-start.sh $KAFKA_HOME/config/server.properties
+	- 创建topic(zk)  kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic hello_topic
+	- 查看topic(zk)  kafka-topics.sh --list --zookeeper localhost:2181
+	- 发送消息(broker)  kafka-console-producer.sh --broker-list hadoop000:9092 --topic hello_topic
+	- 消费消息(zk)  kafka-console-consumer.sh --zookeeper hadoop000:2181 --topic hello_topic 
+	
+- Flume+kafka整合
+	- 启动zookeeper  bin/zkServer.sh start 
+	- 启动kafka kafka-server-start.sh $KAFKA_HOME/config/server.properties
+	- 启动Flume
+	```
+    // 技术选型
+       exec - memeory - avro
+       avro - memeory - kafka
+
+	// Flume 1: exec-memory-avro.conf
+
+	exec-memory-avro.sources = exec-source
+	exec-memory-avro.sinks = avro-sink
+	exec-memory-avro.channels = memory-channel
+
+	exec-memory-avro.sources.exec-source.type = exec
+	exec-memory-avro.sources.exec-source.command = tail -F /Users/guoxingyu/data/data.log
+	exec-memory-avro.sources.exec-source.shell = /bin/sh -c
+
+	exec-memory-avro.sinks.avro-sink.type = avro
+	exec-memory-avro.sinks.avro-sink.hostname = localhost
+	exec-memory-avro.sinks.avro-sink.port = 44444
+
+	exec-memory-avro.channels.memory-channel.type = memory
+
+	exec-memory-avro.sources.exec-source.channels = memory-channel
+	exec-memory-avro.sinks.avro-sink.channel = memory-channel
+
+	// Flume 2: avro-memory-kafka.conf
+
+	avro-memory-kafka.sources = avro-source
+	avro-memory-kafka.sinks = kafka-sink
+	avro-memory-kafka.channels = memory-channel
+
+	avro-memory-kafka.sources.avro-source.type = avro
+	avro-memory-kafka.sources.avro-source.bind = localhost
+	avro-memory-kafka.sources.avro-source.port = 44444
+
+	#avro-memory-kafka.sinks.kafka-sink.type = logger
+	avro-memory-kafka.sinks.kafka-sink.type = org.apache.flume.sink.kafka.KafkaSink
+	avro-memory-kafka.sinks.kafka-sink.brokerList = localhost:9092
+	avro-memory-kafka.sinks.kafka-sink.topic = hello_topic  
+	avro-memory-kafka.sinks.kafka-sink.batchSize = 5
+	avro-memory-kafka.sinks.kafka-sink.requireAcks =1
+
+
+	avro-memory-kafka.channels.memory-channel.type = memory
+
+	avro-memory-kafka.sources.avro-source.channels = memory-channel
+	avro-memory-kafka.sinks.kafka-sink.channel = memory-channel
+
+    // 按顺序启动flume 
+
+    flume-ng agent \
+	--name avro-memory-kafka  \
+	--conf $FLUME_HOME/conf  \
+	--conf-file $FLUME_HOME/conf/avro-memory-kafka.conf \
+	-Dflume.root.logger=INFO,console
+
+
+	flume-ng agent \
+	--name exec-memory-avro  \
+	--conf $FLUME_HOME/conf  \
+	--conf-file $FLUME_HOME/conf/exec-memory-avro.conf \
+	-Dflume.root.logger=INFO,console
+
+	```
+	- 启动一个消费者监听hello_topic  kafka-console-consumer.sh --zookeeper hadoop000:2181 --topic hello_topic 
 
 
 
