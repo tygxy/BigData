@@ -6,6 +6,7 @@ __1.SparkConf,SparkContext,SparkSession区别与联系__
  - SparkConf包含集群配置参数
  - SparkContext是Spark程序入口
  - SparkSession是SQLContext和HiveContext的组合，并且封装了SparkContext
+ - StreamingContext是Spark Streaming的入口，并没有封装SparkContext
 
  __2.DataFrame,DataSet,RDD区别和联系
  - RDD是弹性分布式数据集，创建的是Java对象，例如RDD[person]

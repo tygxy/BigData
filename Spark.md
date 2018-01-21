@@ -648,5 +648,18 @@ val jdbcDF = spark.read
 	```
 	- 配置conf/regionservers改为localhost
 
+## 4.Spark Streaming
+- 工作原理
+	- StreamingContext会启动一些Executor作为receiver去接收实时数据流，把数据按照指定的时间段切成一片片小的数据块，然后把小的数据块传给SparkContext处理RDD
+- 核心概念
+	- StreamingContext是Streaming程序入口，指定conf和批次间隔
+	- DStreams代表一系列的RDDs,每个RDD都包含一个时间间隔内的数据；对DStreams做操作，本质是对每个RDDs做操作
+	- Input DStream和Receivers，除了文件系统，每个Input DStream都需要和一个Receivers相关联，用来接受数据源的数据并存在内存中
+- DStreams的算子
+	- 带状态的算子
+
+
+
+
 
 
