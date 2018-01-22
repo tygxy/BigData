@@ -656,7 +656,9 @@ val jdbcDF = spark.read
 	- DStreams代表一系列的RDDs,每个RDD都包含一个时间间隔内的数据；对DStreams做操作，本质是对每个RDDs做操作
 	- Input DStream和Receivers，除了文件系统，每个Input DStream都需要和一个Receivers相关联，用来接受数据源的数据并存在内存中
 - DStreams的算子
-	- 带状态的算子
+	- 带状态的算子 UpdateStateByKey
+	- 窗口函数 window 定时进行一个时间段的处理；需要定义窗口长度(window length)和滑动间隔(sliding interval)；每隔sliding interval统计前window length的值
+	- DStream和RDD相互作用算子 transform
 
 
 
