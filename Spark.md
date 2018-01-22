@@ -660,6 +660,15 @@ val jdbcDF = spark.read
 	- 窗口函数 window 定时进行一个时间段的处理；需要定义窗口长度(window length)和滑动间隔(sliding interval)；每隔sliding interval统计前window length的值
 	- DStream和RDD相互作用算子 transform
 
+## 4.Spark Streaming + flume
+- push方式，flume发送给Spark Streaming，但是不可靠
+- pull方式，flume发送数据给spark-sink,spark Streaming使用可靠Flume receiver去拉数据
+
+
+
+	flume-ng agent --name simple-agent --conf $FLUME_HOME/conf --conf-file $FLUME_HOME/conf/flume_push_streaming.conf  \
+-Dflume.root.logger=INFO,console
+
 
 
 
