@@ -664,10 +664,14 @@ val jdbcDF = spark.read
 - push方式，flume发送给Spark Streaming，但是不可靠
 - pull方式，flume发送数据给spark-sink,spark Streaming使用可靠Flume receiver去拉数据
 
+## 5.Spark Streaming + kafka
+- 基于Receiver方式 KafkaUtils.createStream
+- Direct方式 KafkaUtils.createDirectStream
 
 
-	flume-ng agent --name simple-agent --conf $FLUME_HOME/conf --conf-file $FLUME_HOME/conf/flume_push_streaming.conf  \
--Dflume.root.logger=INFO,console
+
+
+
 
 
 
