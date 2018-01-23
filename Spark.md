@@ -552,8 +552,8 @@ val jdbcDF = spark.read
 	- 启动kafka kafka-server-start.sh $KAFKA_HOME/config/server.properties
 	- 创建topic(zk)  kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic hello_topic
 	- 查看topic(zk)  kafka-topics.sh --list --zookeeper localhost:2181
-	- 发送消息(broker)  kafka-console-producer.sh --broker-list hadoop000:9092 --topic hello_topic
-	- 消费消息(zk)  kafka-console-consumer.sh --zookeeper hadoop000:2181 --topic hello_topic 
+	- 发送消息(broker)  kafka-console-producer.sh --broker-list localhost:9092 --topic hello_topic
+	- 消费消息(zk)  kafka-console-consumer.sh --zookeeper localhost:2181 --topic hello_topic 
 	
 - Flume+kafka整合
 	- 启动zookeeper  bin/zkServer.sh start 
@@ -668,9 +668,74 @@ val jdbcDF = spark.read
 - 基于Receiver方式 KafkaUtils.createStream
 - Direct方式 KafkaUtils.createDirectStream
 
+## 6.Spark Streaming + kafka + flume
+- java编写log4j日志生成器
+```
+// 编写LoggerGenerator类
+public class LoggerGenerator {
+    private static Logger logger = Logger.getLogger(LoggerGenerator.class.getName());
+
+    public static void main(String[] args) throws Exception {
+        int index = 0;
+        while (true) {
+            Thread.sleep(1000);
+            logger.info("value:" + index++);
+        }
+    }
+}
+
+// 配置log4j.appender
+log4j.rootLogger=INFO,stdout,flume
+
+log4j.appender.stdout = org.apache.log4j.ConsoleAppender
+log4j.appender.stdout.target = System.out
+log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
+log4j.appender.stdout.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss,SSS} [%t] [%c] [%p] - %m%n
 
 
+log4j.appender.flume = org.apache.flume.clients.log4jappender.Log4jAppender
+log4j.appender.flume.Hostname = hadoop000
+log4j.appender.flume.Port = 41414
+log4j.appender.flume.UnsafeMode = true
+```
 
+- 启动Flume收集日志，输出到kafka
+```
+// 配置flume.conf
+streaming.conf
+
+agent1.sources=avro-source
+agent1.channels=logger-channel
+agent1.sinks=kafka-sink
+
+#define source
+agent1.sources.avro-source.type=avro
+agent1.sources.avro-source.bind=localhost
+agent1.sources.avro-source.port=41414
+
+#define channel
+agent1.channels.logger-channel.type=memory
+
+#define sink
+agent1.sinks.kafka-sink.type=org.apache.flume.sink.kafka.KafkaSink
+agent1.sinks.kafka-sink.topic = streamingtopic
+agent1.sinks.kafka-sink.brokerList = localhost:9092
+agent1.sinks.kafka-sink.requiredAcks = 1
+agent1.sinks.kafka-sink.batchSize = 20
+
+agent1.sources.avro-source.channels=logger-channel
+agent1.sinks.kafka-sink.channel=logger-channel
+
+// 启动flume
+flume-ng agent \
+--conf $FLUME_HOME/conf \
+--conf-file $FLUME_HOME/conf/streaming.conf \
+--name agent1 \
+-Dflume.root.logger=INFO,console 
+```
+
+- 启动zk,kafka,配置一个topic
+- 编写spark Streaming业务逻辑
 
 
 
