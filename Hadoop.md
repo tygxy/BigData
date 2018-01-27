@@ -62,7 +62,18 @@
  - 遇到数据倾斜，可以设置hive.groupby.skewindata=true。会有两个MR任务，第一个会将Map的结果随机分布到Reduce中做聚合；第二个MR再根据Key聚合
 
  ## 4.HBase
- - 基本操作 list create put scan get 
+ - 基本操作 list create put scan get
+ - HBase体系结构包含HBase Master服务器和HRegion Server服务器群，前者管理后者，数据也存储在后者中，通过zk协调处理
+    - HRegion是表名+开始/结束主键+表内某段联系的数据，一张完整的表是保存在多个HRegion上的
+    - HRegion服务器 由Hlog和多个HRegion组成;每个HRegion存储实际数据，由Store(一个列族下的数据)组成;每个Store包含MemStore,数据首先在保存在内存MemStore，达到阈值后更新StoreFile(磁盘)中;Hlog用于故障恢复
+    - HBase Master服务器 告诉每个HRegion服务器负责哪些HRegion;HRegion服务器的负载均衡;管理用户对表的增删改查
+    - ROOT表和META表，元数据META表保存HRegion标识符和实际HRegion服务器的映射关系;Root表保存META表
+    - ZK存储的是HBase中Root表和META表的位置;监控各个机器的状态，及时汇报给HBase Master
+- HBase数据模型
+    - 每张表的索引是行关键字，列关键字和时间戳;列由列族和列构成;
+    - 概念上讲HBase是大的映射表，是一个稀疏存储结构，但在物理存储上，是按照列存储
+- Java API
+    - HBaseAdmin,HBaseConfiguration,HTable,Put,Get
  
             
 
