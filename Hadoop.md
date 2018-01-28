@@ -74,6 +74,22 @@
     - 概念上讲HBase是大的映射表，是一个稀疏存储结构，但在物理存储上，是按照列存储
 - Java API
     - HBaseAdmin,HBaseConfiguration,HTable,Put,Get
+
+## 5.Zookeeper
+- ZK是为分布式应用设计对的开源协调服务，为用户提供同步，配置管理，分组和命名等服务，实现一致性，组管理，leader选举以及某些协议
+
+## 6.Avro
+- 数据序列化系统，将数据结构或者对象转换成便于存储和传输的格式
+
+## 7.Yarn
+- MR2的核心是将jobTracjer承担的任务，集群资源管理和作业管理分成两部分，分别是resourceManager和applicationMaster
+- 核心概念
+    - 资源管理器，分为调度器(scheduler)和应用管理器(Application Manager)，前者只负责资源的分配，后者负责接收任务,协商获取第一个容器执行AMaster
+    - 节点管理器(Node Manager)，监控容器的资源使用情况并汇报给调度器，根据容器的状态和应用执行情况
+    - 应用主体(Application Master),负责与调度器协商资源，与节点管理器合作运行和监控task,任务失败重启等,一个应用只有一个AMaster
+    - 资源容器(Container),包括内存，带宽，CPU等资源;container大小固定，地位相等
+- 作业执行流程
+![](resource/yarn.jpg?raw=true)
  
             
 
