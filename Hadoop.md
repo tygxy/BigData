@@ -89,7 +89,7 @@
     - 应用主体(Application Master),负责与调度器协商资源，与节点管理器合作运行和监控task,任务失败重启等,一个应用只有一个AMaster
     - 资源容器(Container),包括内存，带宽，CPU等资源;container大小固定，地位相等
 - 作业执行流程
-![](resource/yarn.jpg?raw=true)
+![](resource/yarn.jpeg?raw=true)
  
             
 
