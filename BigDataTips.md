@@ -19,3 +19,14 @@ __1.SparkConf,SparkContext,SparkSession区别与联系__
  - Hadoop1.0，由HDFS和MapReduce组成，其中HDFS由一个NameNode和多个DateNode组成，MapReduce由一个JobTracker和多个TaskTracker组成。JobTracker负责任务调度管理，资源的分配和机器的运行情况，任务重。
  - Hadoop2.0为克服Hadoop1.0中的不足：针对Hadoop1.0单NameNode制约HDFS的扩展性问题，提出HDFS Federation，它让多个NameNode分管不同的目录进而实现访问隔离和横向扩展，同时彻底解决了NameNode单点故障问题；针对Hadoop1.0中的MapReduce在扩展性和多框架支持等方面的不足，它将JobTracker中的资源管理和作业控制分开，分别由ResourceManager（负责所有应用程序的资源分配）和ApplicationMaster（负责管理一个应用程序）实现，即引入了资源管理框架Yarn。同时Yarn作为Hadoop2.0中的资源管理系统，它是一个通用的资源管理模块，可以运行spark,storm,MR等应用。
 
+
+ ## Hive
+ __1.Hive SQL转化为MR的过程
+ - 主要步骤
+ 	- 使用antlr完成对SQL的语法解析，将SQL转化为抽象语法树AST Tree
+ 	- 遍历AST Tree，生成执行操作树OperatorTree，hive操作符是hive对表数据的逻辑处理
+ 	- 逻辑层优化器对OperatorTree进行优化，与物理优化相比，一是对操作符级别的调整，二是优化不针对特定计算引擎
+ 	- 遍历OperatorTree，划分成若干Task，翻译成MR任务
+ 	- 物理优化器根据各计算引擎的特定，对MR任务优化，最终生成执行计划，执行Task任务
+ 
+
