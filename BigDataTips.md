@@ -3,21 +3,50 @@
 ## Spark 
 
 __1.SparkConf,SparkContext,SparkSession区别与联系__
- - SparkConf包含集群配置参数
- - SparkContext是Spark程序入口
- - SparkSession是SQLContext和HiveContext的组合，并且封装了SparkContext
- - StreamingContext是Spark Streaming的入口，并没有封装SparkContext
+	 - SparkConf包含集群配置参数
+	 - SparkContext是Spark程序入口
+	 - SparkSession是SQLContext和HiveContext的组合，并且封装了SparkContext
+	 - StreamingContext是Spark Streaming的入口，并没有封装SparkContext
 
  __2.DataFrame,DataSet,RDD区别和联系
- - RDD是弹性分布式数据集，创建的是Java对象，例如RDD[person]
- - DataFrame是RDD基础上加入scheme，可以使用sql语句，但是与RDD相比丢失编译类型检查和面向对象;DataFrame表示为Dataset[Row]，即Dataset的子集
- - DataSet,引入了Encoder,此外DataSet[T]中T是强类型的，需要指定
- - Starting in Spark 2.0, Dataset takes on two distinct APIs characteristics: a strongly-typed API and an untyped API, as shown in the table below. Conceptually, consider DataFrame as an alias for a collection of generic objects Dataset[Row], where a Row is a generic untyped JVM object. Dataset, by contrast, is a collection of strongly-typed JVM objects, dictated by a case class you define in Scala or a class in Java.
+	 - RDD是弹性分布式数据集，创建的是Java对象，例如RDD[person]
+	 - DataFrame是RDD基础上加入scheme，可以使用sql语句，但是与RDD相比丢失编译类型检查和面向对象;DataFrame表示为Dataset[Row]，即Dataset的子集
+	 - DataSet,引入了Encoder,此外DataSet[T]中T是强类型的，需要指定
+	 - Starting in Spark 2.0, Dataset takes on two distinct APIs characteristics: a strongly-typed API and an untyped API, as shown in the table below. Conceptually, consider DataFrame as an alias for a collection of generic objects Dataset[Row], where a Row is a generic untyped JVM object. Dataset, by contrast, is a collection of strongly-typed JVM objects, dictated by a case class you define in Scala or a class in Java.
+
+ __3.spark运行流程
+ 	- 在driver运行Spark Application，启动SparkContext
+ 	- SparkContext向yarn申请Executor资源
+ 	- SparkContext将应用程序分发给Executor
+ 	- Executor向SparkContext申请Task
+ 	- SparkContext构建DAG图，由DAG调度器根据shuffle将DAG图分解成Stage，包含了TaskSet，由Task调度器将TaskSet发送给executor
+ 	- task在Executor上运行，运行完释放所有资源
+
 
  ## Hadoop
  __1.Hadoop1.0和2.0的区别
- - Hadoop1.0，由HDFS和MapReduce组成，其中HDFS由一个NameNode和多个DateNode组成，MapReduce由一个JobTracker和多个TaskTracker组成。JobTracker负责任务调度管理，资源的分配和机器的运行情况，任务重。
- - Hadoop2.0为克服Hadoop1.0中的不足：针对Hadoop1.0单NameNode制约HDFS的扩展性问题，提出HDFS Federation，它让多个NameNode分管不同的目录进而实现访问隔离和横向扩展，同时彻底解决了NameNode单点故障问题；针对Hadoop1.0中的MapReduce在扩展性和多框架支持等方面的不足，它将JobTracker中的资源管理和作业控制分开，分别由ResourceManager（负责所有应用程序的资源分配）和ApplicationMaster（负责管理一个应用程序）实现，即引入了资源管理框架Yarn。同时Yarn作为Hadoop2.0中的资源管理系统，它是一个通用的资源管理模块，可以运行spark,storm,MR等应用。
+	 - Hadoop1.0，由HDFS和MapReduce组成，其中HDFS由一个NameNode和多个DateNode组成，MapReduce由一个JobTracker和多个TaskTracker组成。JobTracker负责任务调度管理，资源的分配和机器的运行情况，任务重。
+	 - Hadoop2.0为克服Hadoop1.0中的不足：针对Hadoop1.0单NameNode制约HDFS的扩展性问题，提出HDFS Federation，它让多个NameNode分管不同的目录进而实现访问隔离和横向扩展，同时彻底解决了NameNode单点故障问题；针对Hadoop1.0中的MapReduce在扩展性和多框架支持等方面的不足，它将JobTracker中的资源管理和作业控制分开，分别由ResourceManager（负责所有应用程序的资源分配）和ApplicationMaster（负责管理一个应用程序）实现，即引入了资源管理框架Yarn。同时Yarn作为Hadoop2.0中的资源管理系统，它是一个通用的资源管理模块，可以运行spark,storm,MR等应用。
+	 - 三个区别
+		 - NameNode可以以集群方式部署，增强了NameNode的水平扩展能力
+		 - jobTracker的功能拆分成资源管理RM，作业控制AM
+		 - yarn是一个通用的资源管理模块
+
+ __2.MapReduce2.0提交任务详解
+ 	- 在client端提交job作业
+ 	- 找到一个NodeManager启动ApplicationMaster，并向ResourceManager(yarn)申请资源
+ 	- 资源以container封装，其他节点的NodeManager负责启动，监控管理容器，向RM汇报
+ 	- Task任务在其他container中执行
+
+ __3.MapReduce原理过程
+ 	- Map，Shuffle，combine，reduce
+ 	- combine的作用是map端的reduce聚合;partition的作用是分区，知道key到哪一个reduce，原理是Hash值%reduce数目取模
+
+ __4.HDFS系统结构
+ 	- 采用Master-slaver模式，NameNode负责维护文件系统树，文件目录，数据集群的管理；dataNode存储数据，并定时向NN心跳反馈，发生存储数据的列表
+ 	- 客户端从NN获取元数据，与DN获取数据
+
+ __5.ZK的leader选举算法
 
 
  ## Hive
@@ -28,5 +57,12 @@ __1.SparkConf,SparkContext,SparkSession区别与联系__
  	- 逻辑层优化器对OperatorTree进行优化，与物理优化相比，一是对操作符级别的调整，二是优化不针对特定计算引擎
  	- 遍历OperatorTree，划分成若干Task，翻译成MR任务
  	- 物理优化器根据各计算引擎的特定，对MR任务优化，最终生成执行计划，执行Task任务
+
+__2.sort by和order by区别
+	- order by是全局排序，只有一个reducer;sort by不是全局排序，只在数据进入reducer之前完成排序
+
+__3.
+
+
  
 
