@@ -22,6 +22,33 @@ __1.SparkConf,SparkContext,SparkSession区别与联系__
  	- SparkContext构建DAG图，由DAG调度器根据shuffle将DAG图分解成Stage，包含了TaskSet，由Task调度器将TaskSet发送给executor
  	- task在Executor上运行，运行完释放所有资源
 
+ __4.spark内存管理
+ 	- 1.6之前是静态管理
+	 	- executor分为堆内/堆外内存
+	 	- 堆内内存的大小，由Spark应用程序启动时的–executor-memory设置，Task共享这部分内存。
+	 	- 内存空间分配分为三个部分，Storage内存(0.6)：缓存RDD和广播变量;Exection内存(0.2):缓存Shuffle中的中间数据；其他(0.2),用户定义的数据结构，Spark内部数据等
+	 	- 堆外内存是在工作节点的系统内存直接开辟，存储经过序列化的二进制序列，划分只有Storage内存和Exection内存，各占0.5。
+	 - 1.6之后是统一管理
+	 	- Storage内存和Exection内存共享同一块空间，可以动态占用对方的空闲区域，两部分总共占比0.6，其他占比0.4
+	 	- 堆外保持不变
+
+__5.spark shuffle两种方法 
+	- Hash Based Shuffle
+		- 0.8之前的Shuffle，会产生大量小文件，文件数量是number(map) * number(reduce)
+		- 1.2后，引入Consolidate机制，每个core会产生一个文件，同一个core的Map Task任务产生的数据追加到这个文件中，则会产生number(cores) * number(reduce)
+	- Sort Based Shuffle(默认，从1.2开始)
+		- 每个mapTask会按照key所对应的partition ID进行Sort，如果属于同一个Partition的Key，本身不进行Sort。如果内存不够用，他就会把那些已经排序的内容写到外部disk，结束的时候再进行归并排序，同时生成一个Index文件，reducer通过index取得所要的数据，产生文件2*Map
+	- 由于Hash Shuffle不排序，小数据量的时候比较快，用在数据量小不需要排序的场景
+
+__5.Spark分区器HashPartitioner和RangePartitioner
+	- 分区函数，决定RDD中分区的个数，也决定了Reduce个数，只在key/value中有用，主要提供了每个RDD有几个分区（numPartitions）以及对于给定的值返回一个分区ID（0~numPartitions-1），也就是决定这个值是属于那个分区的。
+	- HashPartitioner分区的原理很简单，对于给定的key，计算其hashCode，并除分区的个数取余
+	- RangePartitioner分区则尽量保证每个分区中数据量的均匀，而且分区与分区之间是有序的,简单的说就是将一定范围内的数映射到某一个分区内
+		- 水塘抽样
+		- 
+
+
+
 
  ## Hadoop
  __1.Hadoop1.0和2.0的区别

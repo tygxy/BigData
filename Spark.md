@@ -99,8 +99,10 @@ for line in result:
 ## 第1章 spark简介
 - 深入理解driver(主控程序，提交job,将job转换成Task,协调executor中Task调度),cluster manager,executor,job,stages,task的关系
 - applicaiton(用户写的应用程序),SparkContext(向cluster manager申请资源)
+
 ## 第2章 spark学习环境的搭建
-## 第3张 rdd实现详解
+
+## 第3章 rdd实现详解
 - 分布式数据集的容错性有两种方式：数据检查点和记录数据的更新（17页）
 - RDD是只读，分区的集合；一个分区就是一个Task处理的基本单元，分区决定并行计算的颗粒，partition和task数量一致
 - partitioner是RDD的分区函数，一种是基于哈希的HashPartitioner;一种是基于范围的RangePartitioner,并且分区函数只对key-value的RDD
@@ -115,18 +117,22 @@ for line in result:
 	- 子RDD的partition依赖多个parent RDD的partition，即为宽依赖，需要shuffle
 - 划分stage的依据 是否有shuffle过程(是否有宽依赖)，
 - 划分job的依据 是否有action动作
+
 ## 第4章 Scheduler(任务调度)模块详解
 - stage划分
 	- 划分依据 shuffle
 	- 划分过程从一个job的最后一个RDD开始，根据它的依赖关系，倒着往前推
 - Task是集群运行的基本单元，有ShuffleMapTask和ResultTask
+
 ## 第5章 Deploy模块详解
 - Cluster Manager部署方式有standalone,local,yarn,EC2,Mesos等
 - yarn Cluster模式，yarn Client模式，区别在于用户提交的application的spark Context在本机运行，适合application与本地有交互的场景
+
 ## 第6章 Executor模块详解
 - 对于同一个application，在一个worker上只有一个executor,带不代表一个物理节点只有一个executor，可以在一个物理节点部署多个worker
 - 参数设置 spark.executor.memory 最多使用内存大小，每个executor上支持的任务数量取决于executor持有的CPU core的数量
 - 一个Executor内同一时刻可以并行执行的Task数由总CPU数／每个Task占用的CPU数决定，即spark.executor.cores / spark.task.cpus
+
 ## 第7章 Shuffle模块详解
 - spark.shuffle.manage
 	- 两种shuffle方式，hash based shuffle和sort based shuffle
@@ -134,6 +140,7 @@ for line in result:
 	- 默认是true，指shuffle过程中如果内存中数据超过阈值，是否将部分数据临时存入外部存储
 - spark.shuffle.memoryFraction
 	- 当shuffle过程中内存达到总内存的多少比例时开始spill，相当于设置shuffle站内存大小
+	
 ## 第8章 Storage模块详解
 - 存储级别
 	- disk_only,memory_only,memory_only_ser,memory_and_disk,memory_and_disk_ser
