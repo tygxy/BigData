@@ -75,7 +75,7 @@ __5.Spark分区器HashPartitioner和RangePartitioner__
 
  __3.MapReduce原理过程__
  
-- Map，Shuffle，combine，reduce
+- Input,Map，combine,Shuffle,reduce
 - combine的作用是map端的reduce聚合;partition的作用是分区，知道key到哪一个reduce，原理是Hash值%reduce数目取模
 
  __4.HDFS系统结构__
