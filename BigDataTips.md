@@ -48,6 +48,7 @@ __5.spark shuffle两种方法__
 __5.Spark分区器HashPartitioner和RangePartitioner__
 
 - 分区函数，决定RDD中分区的个数，也决定了Reduce个数，只在key/value中有用，主要提供了每个RDD有几个分区（numPartitions）以及对于给定的值返回一个分区ID（0~numPartitions-1），也就是决定这个值是属于那个分区的。
+- 两个分区函数继承抽样类partitioner,实现两个方法，获取分区数和根据key计算出属于哪个分区
 - HashPartitioner分区的原理很简单，对于给定的key，计算其hashCode，并除分区的个数取余
 ![](resource/hashpartition.jpg?raw=true)
 - RangePartitioner分区则尽量保证每个分区中数据量的均匀，而且分区与分区之间是有序的,简单的说就是将一定范围内的数映射到某一个分区内
