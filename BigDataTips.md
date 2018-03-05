@@ -125,6 +125,16 @@ select
 	from tableName
 	where rn <= N
 ```
+__3.行列转换__
+![](resource/sql.jpg?raw=true)
+```
+select 年, 
+sum(case when 季度=1 then 销售量 else 0 end) as 一季度, 
+sum(case when 季度=2 then 销售量 else 0 end) as 二季度, 
+sum(case when 季度=3 then 销售量 else 0 end) as 三季度, 
+sum(case when 季度=4 then 销售量 else 0 end) as 四季度 
+from sales group by 年;
+```
 
  
 
