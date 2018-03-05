@@ -116,7 +116,15 @@ __2.sort by和order by区别__
 
 - order by是全局排序，只有一个reducer;sort by不是全局排序，只在数据进入reducer之前完成排序
 
-
+__3.Top N__
+```
+select
+	cookieid,
+	pv,
+	rank() over(partition by cookieid order by pv desc) as rn
+	from tableName
+	where rn <= N
+```
 
  
 
