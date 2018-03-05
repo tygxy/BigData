@@ -84,6 +84,7 @@ __5.Spark分区器HashPartitioner和RangePartitioner__
 - 客户端从NN获取元数据，与DN获取数据
 
  __5.ZK的leader选举算法__
+ 	- 
  
 
 
