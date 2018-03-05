@@ -56,7 +56,14 @@ __5.Spark分区器HashPartitioner和RangePartitioner__
 	- 判断key在rangeBounds中所处的范围，给出该key值在下一个RDD中的分区id下标
 
 
+__6.数据倾斜__
 
+- join
+	- 将reduce join转为map join
+	- 使用随机前缀和扩容RDD进行join
+- 聚合
+	- 两阶段聚合（局部聚合+全局聚合）
+	- 去重+聚合转为reduceByKey
 
 
  ## Hadoop
