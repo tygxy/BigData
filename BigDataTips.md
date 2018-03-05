@@ -51,9 +51,10 @@ __5.Spark分区器HashPartitioner和RangePartitioner__
 - 两个分区函数继承抽样类partitioner,实现两个方法，获取分区数和根据key计算出属于哪个分区
 - HashPartitioner分区的原理很简单，对于给定的key，计算其hashCode，并除分区的个数取余
 ![](resource/hashpartition.jpg?raw=true)
-- RangePartitioner分区则尽量保证每个分区中数据量的均匀，而且分区与分区之间是有序的,简单的说就是将一定范围内的数映射到某一个分区内
-	- 水塘抽样
-	- 
+- RangePartitioner分区则尽量保证每个分区中数据量的均匀，而且分区与分区之间是有序的,简单的说就是将一定范围内的数映射到某一个分区内，主要用在sortByKey这种需要RDD数据排序的分区,该分区器要求RDD中的KEY类型必须是可以排序的
+	- 两个步骤，先重整个RDD中抽取出样本数据，将样本数据排序，计算出每个分区的最大key值，形成一个Array[KEY]类型的数组变量rangeBounds
+	- 判断key在rangeBounds中所处的范围，给出该key值在下一个RDD中的分区id下标
+
 
 
 
@@ -86,9 +87,13 @@ __5.Spark分区器HashPartitioner和RangePartitioner__
 - 客户端从NN获取元数据，与DN获取数据
 
  __5.ZK的leader选举算法__
- 	- 
- 
 
+ __6.一致性哈希__
+
+ 	- 应用场景是分布式集群中
+ 	- 环形Hash空间，0~2^32-1的环形空间，key根据hash算法映射到环上，此外把机器(的ip)也hash到环上，根据顺时针，把key放到最近的机器节点上。
+ 	- 参考http://blog.csdn.net/cywosp/article/details/23397179/
+ 
 
  ## Hive
  __1.Hive SQL转化为MR的过程__
