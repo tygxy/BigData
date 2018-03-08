@@ -93,9 +93,57 @@ __6.数据倾斜__
 - 采用Master-slaver模式，NameNode负责维护文件系统树，文件目录，数据集群的管理；dataNode存储数据，并定时向NN心跳反馈，发生存储数据的列表
 - 客户端从NN获取元数据，与DN获取数据
 
- __5.ZK的leader选举算法__
+__5.HDFS读写操作__
 
- __6.一致性哈希__
+- 文件读取过程，一般的文件读取操作包括：open 、read、close等
+	- 使用HDFS提供的客户端开发库，向远程的Namenode发起RPC请求
+	- Namenode会视情况返回文件的部分或者全部block列表，对于每个block，Namenode都会返回持有该block拷贝的datanode地址
+	- 客户端开发库会选取离客户端最接近的datanode来读取block
+	- 读取完当前block的数据后，关闭与当前的datanode连接，并为读取下一个block寻找最佳的datanode
+	- 当读完列表的block后，且文件读取还没有结束，客户端开发库会继续向Namenode获取下一批的block列表
+	- 读取完一个block都会进行checksum验证，如果读取datanode时出现错误，客户端会通知Namenode，然后再从下一个拥有该block拷贝的datanode继续读
+- 写文件过程，数据的写入过程 一般文件写入操作不外乎create、write、close几种
+	- 使用HDFS提供的客户端开发库，向远程的Namenode发起RPC请求；
+	- Namenode会检查要创建的文件是否已经存在，创建者是否有权限进行操作，成功则会为文件创建一个记录，否则会让客户端抛出异常；
+	- 当客户端开始写入文件的时候，开发库会将文件切分成多个packets（信息包），并在内部以"data queue"的形式管理这些packets，并向Namenode申请新的blocks，获取用来存储replicas（复制品）的合适的datanodes列表，列表的大小根据在Namenode中对replication的设置而定。
+	- 开始以pipeline（管道）的形式将packet写入所有的replicas中。开发库把packet以流的方式写入第一个datanode，该datanode把该packet存储之后，再将其传递给在此pipeline（管道）中的下一个datanode，直到最后一个datanode，这种写数据的方式呈流水线的形式。
+	- 最后一个datanode成功存储之后会返回一个ack packet，在pipeline里传递至客户端，在客户端的开发库内部维护着"ack queue"，成功收到datanode返回的ack packet后会从"ack queue"移除相应的packet。
+	- 如果传输过程中，有某个datanode出现了故障，那么当前的pipeline会被关闭，出现故障的datanode会从当前的pipeline中移除，剩余的block会继续剩下的datanode中继续以pipeline的形式传输，同时Namenode会分配一个新的datanode，保持replicas设定的数量。
+
+
+__6.HDFS分布式文件系统NameNode和Secondary NameNode__
+
+- NameNode启动时如何维护元数据
+	- Edits文件：NameNode在本地操作系统的文件都会保存在Edits日志文件中。也就是说当文件系统中的任何元数据产生操作时，都会记录在Edits日志文件中
+	- FsImage映像文件：整个文件系统的名字空间，包括数据块到文件的映射，文件的属性等等，都存储在一个称为FsImage的文件中，这个文件也是放在NameNode所在的文件系统中。
+	- 流程介绍：
+		- 加载fsimage映像文件到内存
+		- 加载edits文件到内存
+		- 在内存将fsimage映像文件和edits文件进行合并
+		- 将合并后的文件写入到fsimage中
+		- 清空原先edits中的数据，使用一个空的edits文件进行正常操作
+
+- Secondary NameNode和NameNode区别
+	- NameNode：存储文件的metadata，运行时所有数据都保存在内存中，这个的HDFS可存储的文件受限于NameNode的内存。NameNode失效则整个HDFS都失效了，所以要保证NameNode的可用性
+	- Secondary NameNode：定时与NameNode进行同步，定期的将fsimage映像文件和Edits日志文件进行合并，并将合并后的传入给NameNode，替换其镜像，并清空编辑日志。如果NameNode失效，需要手动的将其设置成主机。NameNode可以在需要的时候应用Secondary NameNode上的检查点镜像
+	- checkpoint流程
+		- NameNode通知Secondary NameNode进行checkpoint。
+		- Secondary NameNode通知NameNode切换edits日志文件，使用一个空的。
+		- Secondary NameNode通过Http获取NmaeNode上的fsimage映像文件和切换前的edits日志文件。
+		- Secondary NameNode在内容中合并fsimage和Edits文件。
+		- Secondary NameNode将合并之后的fsimage文件发送给NameNode。
+		- NameNode用Secondary NameNode 传来的fsImage文件替换原先的fsImage文件。
+
+__7.HDFS可靠性保障__ 
+	- 冗余备份，默认三份
+	- 副本存放位置策略，本地机架节点，同一个机架的另一个节点上，不同机架的节点上
+	- 心跳检测，NameNode周期性地从集群中的每个DataNode接受心跳包和块报告
+	- 数据完整性检测，NameNode在创建HDFS文件时，会计算每个数据的校验和并储存起来。当客户端从DataNode获取数据时，他会将获取的数据的校验和与之前储存的校验和进行对比。
+	- 空间回收：从HDFS中删除的文件会首先被放入到/trash中
+	- 核心文件备份，HDFS的核心文件是映像文件（FsImage）和事务日志（Edit），系统支持对这两个文件的备份，以确保NameNode宕机后的恢复。
+
+
+ __8.一致性哈希__
 
  	- 应用场景是分布式集群中
  	- 环形Hash空间，0~2^32-1的环形空间，key根据hash算法映射到环上，此外把机器(的ip)也hash到环上，根据顺时针，把key放到最近的机器节点上。
@@ -104,10 +152,23 @@ __6.数据倾斜__
 
  ## Hive
  __1.Hive SQL转化为MR的过程__
- 
+
+ - hive工作原理
+ 	- 用户提交查询等任务给Driver。
+	- 编译器获得该用户的任务Plan。
+	- 编译器Compiler根据用户任务去MetaStore中获取需要的Hive的元数据信息。
+	- 编译器Compiler得到元数据信息，对任务进行编译，先将HiveQL转换为抽象语法树，然后将抽象语法树转换成查询块，将查询块转化为逻辑的查询计划，重写逻辑查询计划，将逻辑计划转化为物理的计划（MapReduce）, 最后选择最佳的策略。
+	- 将最终的计划提交给Driver。
+	- Driver将计划Plan转交给ExecutionEngine去执行，获取元数据信息，提交给JobTracker或者SourceManager执行该任务，任务会直接读取HDFS中文件进行相应的操作。
+	- 获取执行的结果。
+	- 取得并返回执行结果。
+
+ - hiveSQL转换成MapReduce的执行计划包括如下几个步骤：HiveSQL ->AST(抽象语法树) -> QB(查询块) ->OperatorTree（操作树）->优化后的操作树->mapreduce任务树->优化后的mapreduce任务树
+
  - 主要步骤
 	- 使用antlr完成对SQL的语法解析，将SQL转化为抽象语法树AST Tree
-	- 遍历AST Tree，生成执行操作树OperatorTree，hive操作符是hive对表数据的逻辑处理
+	- 遍历AST Tree，抽象出查询的基本组成单元QueryBlock,QueryBlock是一条SQL最基本的组成单元，包括三个部分：输入源，计算过程，输出。简单来讲一个QueryBlock就是一个子查询。
+	- 遍历QueryBlock，生成执行操作树OperatorTree，hive操作符是hive对表数据的逻辑处理，基本的操作符包括TableScanOperator，SelectOperator，FilterOperator等等
 	- 逻辑层优化器对OperatorTree进行优化，与物理优化相比，一是对操作符级别的调整，二是优化不针对特定计算引擎
 	- 遍历OperatorTree，划分成若干Task，翻译成MR任务
 	- 物理优化器根据各计算引擎的特定，对MR任务优化，最终生成执行计划，执行Task任务
@@ -125,7 +186,7 @@ select
 	from tableName
 	where rn <= N
 ```
-__3.行列转换__
+__4.行列转换__
 ![](resource/sql.jpg?raw=true)
 ```
 select 年, 
@@ -135,6 +196,13 @@ sum(case when 季度=3 then 销售量 else 0 end) as 三季度,
 sum(case when 季度=4 then 销售量 else 0 end) as 四季度 
 from sales group by 年;
 ```
+__5.hive架构__
+	- 用户接口：CLI（命令行）、JDBC/ODBC客户端、web GUI
+	- metaStore: hive 的元数据结构描述信息库，可选用不同的关系型数据库来存储，通过配置文件修改、查看数据库配置信息
+	- Driver: 解释器、编译器、优化器完成HQL查询语句从词法分析、语法分析、编译、优化以及查询计划的生成。生成的查询计划存储在HDFS中，并在随后由MapReduce调用执行
+	- Hive的数据存储在HDFS中，大部分的查询、计算由MapReduce完成
 
- 
+
+
+
 
