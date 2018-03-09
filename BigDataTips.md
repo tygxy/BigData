@@ -135,6 +135,7 @@ __6.HDFS分布式文件系统NameNode和Secondary NameNode__
 		- NameNode用Secondary NameNode 传来的fsImage文件替换原先的fsImage文件。
 
 __7.HDFS可靠性保障__ 
+
 	- 冗余备份，默认三份
 	- 副本存放位置策略，本地机架节点，同一个机架的另一个节点上，不同机架的节点上
 	- 心跳检测，NameNode周期性地从集群中的每个DataNode接受心跳包和块报告
