@@ -54,7 +54,7 @@ __5.Spark分区器HashPartitioner和RangePartitioner__
 - RangePartitioner分区则尽量保证每个分区中数据量的均匀，而且分区与分区之间是有序的,简单的说就是将一定范围内的数映射到某一个分区内，主要用在sortByKey这种需要RDD数据排序的分区,该分区器要求RDD中的KEY类型必须是可以排序的
 	- 两个步骤，先重整个RDD中抽取出样本数据，将样本数据排序，计算出每个分区的最大key值，形成一个Array[KEY]类型的数组变量rangeBounds
 	- 判断key在rangeBounds中所处的范围，给出该key值在下一个RDD中的分区id下标
-
+- 参考 https://www.cnblogs.com/liuming1992/p/6377540.html
 
 __6.数据倾斜__
 
