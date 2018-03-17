@@ -65,6 +65,13 @@ __6.数据倾斜__
 	- 两阶段聚合（局部聚合+全局聚合）
 	- 去重+聚合转为reduceByKey
 
+__7.Hadoop和Spark区别__
+	- MapReduce中计算结果需要落地，Spark把中间数据放到内存中，迭代运算效率高。
+	- Spark算子更丰富
+	- Spark容错性高，Spark引进了弹性分布式数据集RDD的抽象，如果数据集一部分丢失，则可以根据“血统”（即充许基于数据衍生过程）对它们进行重建。另外在RDD计算时可以通过CheckPoint来实现容错，而CheckPoint有两种方式：CheckPoint Data，和Logging The Updates，用户可以控制采用哪种方式来实现容错
+
+
+
 
  ## Hadoop
  __1.Hadoop1.0和2.0的区别__
