@@ -70,7 +70,8 @@ __7.Hadoop和Spark区别__
 	- Spark算子更丰富
 	- Spark容错性高，Spark引进了弹性分布式数据集RDD的抽象，如果数据集一部分丢失，则可以根据“血统”（即充许基于数据衍生过程）对它们进行重建。另外在RDD计算时可以通过CheckPoint来实现容错，而CheckPoint有两种方式：CheckPoint Data，和Logging The Updates，用户可以控制采用哪种方式来实现容错
 
-
+__8.spark和Mapreduce为什么快__
+	- 1.内存迭代。2.RDD设计。 3.算子的设计。
 
 
  ## Hadoop
@@ -132,7 +133,8 @@ __6.HDFS分布式文件系统NameNode和Secondary NameNode__
 
 - Secondary NameNode和NameNode区别
 	- NameNode：存储文件的metadata，运行时所有数据都保存在内存中，这个的HDFS可存储的文件受限于NameNode的内存。NameNode失效则整个HDFS都失效了，所以要保证NameNode的可用性
-	- Secondary NameNode：定时与NameNode进行同步，定期的将fsimage映像文件和Edits日志文件进行合并，并将合并后的传入给NameNode，替换其镜像，并清空编辑日志。如果NameNode失效，需要手动的将其设置成主机。NameNode可以在需要的时候应用Secondary NameNode上的检查点镜像
+	- Secondary NameNode：SecondNamenode是对主Namenode的一个补充，它会周期的执行对HDFS元数据的检查点。定时与NameNode进行同步，定期的将fsimage映像文件和Edits日志文件进行合并，并将合并后的传入给NameNode，替换其镜像，并清空编辑日志。如果NameNode失效，需要手动的将其设置成主机。NameNode可以在需要的时候应用Secondary NameNode上的检查点镜像
+	- Namenode的edits文件过大的问题，也就是SecondeNamenode要解决的主要问题。SecondNamenode会按照一定规则被唤醒，然后进行fsimage文件与edits文件的合并，防止edits文件过大，导致Namenode启动时间过长。
 	- checkpoint流程
 		- NameNode通知Secondary NameNode进行checkpoint。
 		- Secondary NameNode通知NameNode切换edits日志文件，使用一个空的。
@@ -140,6 +142,17 @@ __6.HDFS分布式文件系统NameNode和Secondary NameNode__
 		- Secondary NameNode在内容中合并fsimage和Edits文件。
 		- Secondary NameNode将合并之后的fsimage文件发送给NameNode。
 		- NameNode用Secondary NameNode 传来的fsImage文件替换原先的fsImage文件。
+
+- Hadoop 2.0 HA
+	- 主备切换控制器 ZKFailoverController：ZKFailoverController 作为独立的进程运行，对 NameNode 的主备切换进行总体控制。ZKFailoverController 能及时检测到NameNode的健康状况，在主NameNode故障时借助Zookeeper 实现自动的主备选举和切换，当然NameNode目前也支持不依赖于Zookeeper的手动主备切换
+	- 同时启动NameNode,其中一个处于active工作状态，另外一个处于随时待命standby状态。这样，当一个NameNode所在的服务器宕机时，可以在数据不丢失的情况下，手工或者自动切换到另一个NameNode提供服务。
+	- 这些NameNode之间通过共享数据，保证数据的状态一致。多个NameNode之间共享数据，可以通过Network File System或者Quorum Journal Node。前者是通过Linux共享的文件系统，属于操作系统的配置；后者是Ｈadoop自身的东西，属于软件的配置.
+	- Quorum Journal Node:会通过一组称作JournalNodes的独立进程进行相互通信。当active状态的NameNode的命名空间有任何修改时，会告知大部分的JournalNodes进程。standby状态的NameNode有能力读取JNs中的变更信息，并且一直监控edit log的变化，把变化应用于自己的命名空间。standby可以确保在集群出错时，命名空间状态已经完全同步了.
+	- 为了确保快速切换，standby状态的NameNode有必要知道集群中所有数据块的位置。为了做到这点，所有的datanodes必须配置两个NameNode的地址，发送数据块位置信息和心跳给他们两个。
+
+
+
+
 
 __7.HDFS可靠性保障__ 
 
