@@ -71,7 +71,9 @@ __7.Hadoop和Spark区别__
 	- Spark容错性高，Spark引进了弹性分布式数据集RDD的抽象，如果数据集一部分丢失，则可以根据“血统”（即充许基于数据衍生过程）对它们进行重建。另外在RDD计算时可以通过CheckPoint来实现容错，而CheckPoint有两种方式：CheckPoint Data，和Logging The Updates，用户可以控制采用哪种方式来实现容错
 
 __8.spark和Mapreduce为什么快__
-	- 1.内存迭代。2.RDD设计。 3.算子的设计。
+	- 内存计算，带来了更高的迭代运算效率
+	- 基于DAG的任务调度执行机制 
+	- 丰富的算子的设计，RDD的设计。
 
 
  ## Hadoop
@@ -83,6 +85,19 @@ __8.spark和Mapreduce为什么快__
 	 - NameNode可以以集群方式部署，增强了NameNode的水平扩展能力
 	 - jobTracker的功能拆分成资源管理RM，作业控制AM
 	 - yarn是一个通用的资源管理模块
+- 改进
+	- HDFS单一名称节点，存在单点失效问题；设计了HDFS HA，提供名称节点热备机制
+	- HDFS单一命名空间，无法实现资源隔离；设计了HDFS Federation，管理多个命名空间
+	- MR资源管理效率低，设计了新的资源管理框架YARN
+
+- HDFS2.0 HA
+	- HA集群设置两个名称节点，“活跃（Active）”和“待命（Standby”，两种名称节点的状态同步，可以借助于一个共享存储系统来实现(NFS，QJM等)，一旦活跃名称节点出现故障，就可以立即切换到待命名称节点，Zookeeper确保一个名称节点在对外服务，名称节点维护映射信息，数据节点同时向两个名称节点汇报信息
+
+- HDFS Federation
+	- 在HDFS Federation中，设计了多个相互独立的名称节点，使得HDFS的命名服务能够水平扩展，这些名称节点分别进行各自命名空间和块的管理，相互之间是联盟（Federation）关系，不需要彼此协调。并且向后兼容
+	- HDFS Federation中，所有名称节点会共享底层的数据节点存储资源，数据节点向所有名称节点汇报
+	- 属于同一个命名空间的块构成一个“块池”
+
 
  __2.MapReduce2.0提交任务详解__
  
