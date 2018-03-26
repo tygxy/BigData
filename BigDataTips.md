@@ -71,9 +71,9 @@ __7.Hadoop和Spark区别__
 	- Spark容错性高，Spark引进了弹性分布式数据集RDD的抽象，如果数据集一部分丢失，则可以根据“血统”（即充许基于数据衍生过程）对它们进行重建。另外在RDD计算时可以通过CheckPoint来实现容错，而CheckPoint有两种方式：CheckPoint Data，和Logging The Updates，用户可以控制采用哪种方式来实现容错
 
 __8.spark和Mapreduce为什么快__
-	- 内存计算，带来了更高的迭代运算效率
+	- 内存计算，带来了更高的迭代运算效率，多个任务之间数据通信可以不需要借助硬盘而是通过内存，而hadoop由于本身的模型特点，多个任务之间数据通信是必须借助硬盘落地的。
 	- 基于DAG的任务调度执行机制 
-	- 丰富的算子的设计，RDD的设计。
+	- 多线程调度，Hadoop每次MapReduce操作，启动一个Task便会启动一次JVM，基于进程的操作。而Spark每次MapReduce操作是基于线程的，只在启动Executor是启动一次JVM，内存的Task操作是在线程复用的。
 
 
  ## Hadoop
@@ -180,10 +180,14 @@ __7.HDFS可靠性保障__
 
 
  __8.一致性哈希__
-
  	- 应用场景是分布式集群中
  	- 环形Hash空间，0~2^32-1的环形空间，key根据hash算法映射到环上，此外把机器(的ip)也hash到环上，根据顺时针，把key放到最近的机器节点上。
  	- 参考http://blog.csdn.net/cywosp/article/details/23397179/
+
+
+ __9.Map,reduce数量怎么确定
+ 	- Map个数取决于文件分块的个数，以及文件分块的大小。可以手动设置Map的数量，但是必须不能小于文件分块的数量。比如有两个文件，一个是129M，一个是20M，那么Hadoop2版本，会分成三个map task
+ 	- reducer个数是由partition个数决定,mapper产生的中间数据经过shuffer过程，根据我们的业务把数据分成若干partition，每个partition的数据由对应的一个reducer来处理。通过调用JobConf.class的实例中的job.setNumReduceTask(n)确定
  
 
  ## Hive
@@ -237,6 +241,7 @@ __5.hive架构__
 	- metaStore: hive 的元数据结构描述信息库，可选用不同的关系型数据库来存储，通过配置文件修改、查看数据库配置信息
 	- Driver: 解释器、编译器、优化器完成HQL查询语句从词法分析、语法分析、编译、优化以及查询计划的生成。生成的查询计划存储在HDFS中，并在随后由MapReduce调用执行
 	- Hive的数据存储在HDFS中，大部分的查询、计算由MapReduce完成
+	
 
 
 
