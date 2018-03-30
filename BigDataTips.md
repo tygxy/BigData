@@ -18,7 +18,7 @@ __1.SparkConf,SparkContext,SparkSession区别与联系__
 
  __3.spark运行流程__
  
-- 在driver运行Spark Application，启动SparkContext
+- 在driver运行Spark Application，启动SparkContext，driver节点可以需要与executor通信，rpc等，所以需要配置内存
 - SparkContext向yarn申请Executor资源
 - SparkContext将应用程序分发给Executor
 - Executor向SparkContext申请Task
