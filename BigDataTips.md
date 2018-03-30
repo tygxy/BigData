@@ -28,7 +28,7 @@ __1.SparkConf,SparkContext,SparkSession区别与联系__
  __4.spark内存管理__
  
 - 1.6之前是静态管理
-	- executor分为堆内/堆外内存
+	- executor分为堆内/堆外内存，堆外内存是序列化后的
 	- 堆内内存的大小，由Spark应用程序启动时的–executor-memory设置，Task共享这部分内存。
 	- 内存空间分配分为三个部分，Storage内存(0.6)：缓存RDD和广播变量;Exection内存(0.2):缓存Shuffle中的中间数据；其他(0.2),用户定义的数据结构，Spark内部数据等
 	- 堆外内存是在工作节点的系统内存直接开辟，存储经过序列化的二进制序列，划分只有Storage内存和Exection内存，各占0.5。
