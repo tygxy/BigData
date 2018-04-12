@@ -236,6 +236,19 @@ sum(case when 季度=3 then 销售量 else 0 end) as 三季度,
 sum(case when 季度=4 then 销售量 else 0 end) as 四季度 
 from sales group by 年;
 ```
+
+
+```
+         select dt,domain,
+                max(case when alertlevel = 'HIGH' then num else 0 end) as high,
+                max(case when alertlevel = 'MEDIUM' then num else 0 end) as mediums,
+                max(case when alertlevel = 'LOW' then num else 0 end) as low
+                from (
+                 select dt,domain,alertlevel,count(1) as num from default.t_waf_log_websec where dt = '2017-07-14' group by dt,domain,alertlevel
+                ) t
+               group by dt,domain
+
+```
 __5.hive架构__
 	- 用户接口：CLI（命令行）、JDBC/ODBC客户端、web GUI
 	- metaStore: hive 的元数据结构描述信息库，可选用不同的关系型数据库来存储，通过配置文件修改、查看数据库配置信息
