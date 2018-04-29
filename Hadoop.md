@@ -91,6 +91,27 @@
 - 作业执行流程
 ![](resource/yarn.jpeg?raw=true)
  
-            
+           
+# 《Hadoop核心编程》
+
+## 第一章 初识Hadoop
+- Hadoop2.0与1.0变化
+    - Yarn
+    - HDFS邦联管理，HDFS命名空间分散在多个NameNode中
+    - HDFS HA 
+
+## 第二章 关于MapReduce
+- map端的输入也是<k,v>的形式，key是行偏移量，value是文本
+- Hadoop提供了一套可优化网络序列化传输的基本类型，比如LongWritable,Text之类，而不直接使用Java类型
+- 最佳分片大小应该与hdfs块大小一致，如果分片横跨两个数据块，那么HDFS节点基本不可能同时存储两个块，部分数据就需要网络传输到Map节点上
+- map结果落地是本地磁盘，reduce输出一般是HDFS，其中一个在本地，另外两个在其他机架上
+- 如果有多个reduce任务，map就会针对输出进行分区
+
+## 第三章 Hadoop分布式文件系统
+- 故障转移控制器是基于zookeeper的确保有且仅有一个active NameNode的轻量级进程，会采用心跳机制反馈zookeeper
+- 规避机制，就是当网速非常慢，可能诱发故障转移，但是先前活动的NameNode依然运行，且还是Active NameNode，会有规避机制防止两个NameNode同时运行
+
+
+
 
  
