@@ -455,6 +455,13 @@ val jdbcDF = spark.read
 	flume-env.sh的配置：export JAVA_HOME=/home/hadoop/app/jdk1.8.0_144
 	检测: flume-ng version
 ```
+- 启动某个agent命令
+```
+flume-ng agent --name a1 --conf $FLUME_HOME/conf --conf-file $FLUME_HOME/conf/example.conf -Dflume.root.logger=INFO,console
+
+// a1是agent名称，--conf-file是配置agent的xx.conf的位置，如果后台运行在后面加&
+
+```
 - Flume的使用
 	- 需要配置source,channel,sink,再把三个串起来
 	- a1: agent名称 r1: source的名称 k1: sink的名称 c1: channel的名称
@@ -542,6 +549,34 @@ val jdbcDF = spark.read
 	--conf-file $FLUME_HOME/conf/exec-memory-avro.conf \
 	-Dflume.root.logger=INFO,console
 	```
+	- 例子3 ：从Kafka消费数据，存入HDFS，按照小时存入
+	```
+	a2.sources  = source2
+	a2.channels = channel2
+	a2.sinks = sink2
+
+	a2.sources.source2.type = org.apache.flume.source.kafka.KafkaSource
+	a2.sources.source2.kafka.bootstrap.servers = server1:9092,server2:9092,server3:9092  
+	a2.sources.source2.kafka.topics = aqblog  
+	a2.sources.source2.kafka.consumer.group.id = flume_test
+	a2.sources.source2.channels = channel2
+	a2.sources.source2.interceptors = i1                     #设置拦截器
+	a2.sources.source2.interceptors.i1.type = timestamp  
+	a2.sources.source2.kafka.consumer.timeout.ms = 100
+
+	a2.channels.channel2.type = memory
+	a2.channels.channel2.capacity = 10000000
+	a2.channels.channel2.transactionCapacity = 10000
+
+	a2.sinks.sink2.type = hdfs
+	a2.sinks.sink2.hdfs.path = hdfs://server1:8020/project/syslog1/%y-%m-%d
+	a2.sinks.sink2.hdfs.rollInterval = 60    #设置多长时间保存一次数据
+	a2.sinks.sink2.hdfs.rollSize = 0         #不按照大小生成文件,设置2914560,则128M时生成文件
+	a2.sinks.sink2.hdfs.rollCount = 0		 #不按照条数生成文件,设置后为多少条产生一个文件
+	a2.sinks.sink2.hdfs.fileType = DataStream
+	a2.sinks.sink2.channel = channel2
+	```
+	
 - event是flume数据传输的基本单元，由可选的header+ byte array构成，例如Event: { headers:{} body: 68 65 6C 6C 6F 0D hello.}
 
 ## 3.分布式消息队列Kafka
