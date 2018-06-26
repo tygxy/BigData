@@ -1,6 +1,7 @@
 # Redis
 
 参考文献 http://www.runoob.com/redis/redis-tutorial.html
+        https://blog.csdn.net/kevinzhao475720456/article/details/65467254
 
 ## 1.数据类型
 - 支持的数据类型String,Hash,List,set,zset(有序集合)
