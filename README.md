@@ -6,5 +6,6 @@
 ## [4. Hive-new](https://github.com/tygxy/BigData/blob/master/hive-new.md)
 ## [5. Spark](https://github.com/tygxy/BigData/blob/master/Spark.md)
 ## [6. Kafka Demo](https://github.com/tygxy/BigData/blob/master/Kafka_Demo.md)
+## [6. Kafka](https://github.com/tygxy/BigData/blob/master/kafka.md)
 ## [7. Redis](https://github.com/tygxy/BigData/blob/master/Redis.md)
 
