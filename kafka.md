@@ -55,6 +55,7 @@
 </dependencies>
 ```
 ### 6.2 生产者 Java API
+- 详细例子请看/KafkaByJavaAPI
 - 单线程
 ```
 public class QuotaitonProducer {
@@ -143,7 +144,8 @@ public class QuotaitonProducer {
     }
 }
 ```
-### 6.2 消费者 Java API
+### 6.3 消费者 Java API
+- 详细例子请看/KafkaByJavaAPI
 ```
 package com.bupt.javaEE.Test;
 
@@ -214,9 +216,74 @@ public class KafkaSimpleConsumer {
     }
 }
 ```
+## 第八章 kafka数据采集应用
+
+### 8.1 kafka + Log4j
+- 详细例子请看/KafkaByJavaAPI
+![](/resource/kafka_log4j.jpg?raw=true)
+- pom
+```
+<dependency>
+    <groupId>org.apache.kafka</groupId>
+    <artifactId>kafka-log4j-appender</artifactId>
+    <version>0.10.2.1</version>
+</dependency>
+<dependency>
+    <groupId>org.slf4j</groupId>
+    <artifactId>slf4j-log4j12</artifactId>
+    <version>1.7.5</version>
+</dependency>
+```
+- log4j.properties
+```
+log4j.rootLogger=INFO,console,KAFKA
+## appender KAFKA
+log4j.appender.KAFKA=kafka.producer.KafkaLog4jAppender
+log4j.appender.KAFKA.topic=kafka-log4j
+log4j.appender.KAFKA.brokerList=127.0.0.1:9092
+
+log4j.appender.KAFKA.compressionType=none
+log4j.appender.KAFKA.syncSend=true
+log4j.appender.KAFKA.layout=org.apache.log4j.PatternLayout
+log4j.appender.KAFKA.ThresholdFilter.level=INFO
+log4j.appender.KAFKA.ThresholdFilter.onMatch=ACCEPT
+log4j.appender.KAFKA.ThresholdFilter.onMismatch=DENY
+
+log4j.appender.KAFKA.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L %% - %m%n
+
+## appender console
+log4j.appender.console=org.apache.log4j.ConsoleAppender
+log4j.appender.console.target=System.out
+log4j.appender.console.layout=org.apache.log4j.PatternLayout
+log4j.appender.console.layout.ConversionPattern=%d (%t) [%p - %l] %m%n
+```
+- Log4jProducer
+```
+package com.bupt.javaEE.Test;
+
+import org.apache.log4j.Logger;
+
+/**
+ * Created by guoxingyu on 2018/7/8.
+ * 实现功能：kafka + log4j
+ */
+public class Log4jProducer {
+    private static final Logger LOG = Logger.getLogger(Log4jProducer.class);
+
+    public static void main(String[] args) throws InterruptedException {
+        for(int i = 0;i <= 10; i++) {
+            LOG.info("This is Message [" + i + "] from log4j producer .. ");
+            Thread.sleep(1000);
+        }
+    }
+}
+
+```
 
 
-
+### 8.2 kafka + Flume
+- 详细例子请看/KafkaByJavaAPI
+![](/resource/kafka_flume.jpg?raw=true)
 
 
 
