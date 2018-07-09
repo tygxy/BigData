@@ -282,8 +282,38 @@ public class Log4jProducer {
 
 
 ### 8.2 kafka + Flume
-- 详细例子请看/KafkaByJavaAPI
+- 详细例子请看/Users/guoxingyu/app/apache-flume-1.6.0-cdh5.7.0-bin/project/flume-kafka-test.conf
 ![](/resource/kafka_flume.jpg?raw=true)
+- Flume结构是数据源source,通道channel,接收器sink，在源和接收器之间可以加拦截器进行数据处理，此外还提供了负载均衡和故障转移。
+- flume 源是linux命令 + 通道内存 + kafka接受
+    - 执行命令 flume-ng agent --name agent --conf $FLUME_HOME/conf --conf-file $FLUME_HOME/project/flume-kafka-test.conf -Dflume.root.logger=INFO,console
+    - 配置
+    ```
+    agent.sources = sc
+    agent.sinks = sk
+    agent.channels = chl
+
+    #指定源类型是linux命令
+    agent.sources.sc.type = exec
+    agent.sources.sc.command = tail -f /Users/guoxingyu/data/test.log
+    agent.sources.sc.fileHeader = false
+
+    agent.sinks.sk.type = org.apache.flume.sink.kafka.KafkaSink
+    agent.sinks.sk.brokerList = localhost:9092
+    agent.sinks.sk.topic = hello_topic
+    agent.sinks.sk.batchSize = 5
+    agent.sinks.sk.requireAcks =1
+    agent.sinks.sk.custom.encoding=UTF-8
+
+
+    agent.channels.chl.type = memory
+    #指定通过中停留的最大事件数
+    agent.channels.chl.capacity = 1000
+
+    agent.sources.sc.channels = chl
+    agent.sinks.sk.channel = chl
+    ```
+- flume 源是kafka + 通道内存 + HDFS接受
 
 
 
