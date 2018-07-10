@@ -313,7 +313,39 @@ public class Log4jProducer {
     agent.sources.sc.channels = chl
     agent.sinks.sk.channel = chl
     ```
-- flume 源是kafka + 通道内存 + HDFS接受
+- flume 源是kafka + 通道内存 + HDFS接收
+    - 执行命令 flume-ng agent --name agent --conf $FLUME_HOME/conf --conf-file $FLUME_HOME/project/test.conf -Dflume.root.logger=INFO,console
+    - 配置
+    ```
+    agent.sources = kafkaSource
+    agent.channels = memoryChannel
+    agent.sinks = hdfsSink
+
+
+    # The channel can be defined as follows.
+    agent.sources.kafkaSource.channels = memoryChannel
+    agent.sources.kafkaSource.type=org.apache.flume.source.kafka.KafkaSource
+    agent.sources.kafkaSource.zookeeperConnect=127.0.0.1:2181
+    agent.sources.kafkaSource.topic=hello_topic
+    #agent.sources.kafkaSource.groupId=flume
+    agent.sources.kafkaSource.kafka.consumer.timeout.ms=100
+
+    agent.channels.memoryChannel.type=memory
+    agent.channels.memoryChannel.capacity=1000
+    agent.channels.memoryChannel.transactionCapacity=100
+
+
+    # the sink of hdfs
+    agent.sinks.hdfsSink.type=hdfs
+    agent.sinks.hdfsSink.channel = memoryChannel
+    agent.sinks.hdfsSink.hdfs.path=hdfs://localhost:8020/project/syslog/dt=%Y%m%d
+    agent.sinks.hdfsSink.hdfs.writeFormat=Text
+    agent.sinks.hdfsSink.hdfs.fileType=DataStream
+    agent.sinks.hdfsSink.hdfs.rollSize=0
+    agent.sinks.hdfsSink.hdfs.rollCount=0
+    agent.sinks.hdfsSink.hdfs.rollInterval=60
+    agent.sinks.hdfsSink.hdfs.threadsPoolSize=15
+    ```
 
 
 
