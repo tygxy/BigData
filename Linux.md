@@ -60,8 +60,15 @@
 	- grep查找关键字 
 		- grep -n "guoxingyu" test // 在test文件中查找guoxingyu，-n显示行号
 	- find 
-	- wc 
-
+		- find . -name "*.txt"
+		- find /xx/xx -type f
+	- wc统计次数
+		- grep "111" test | wc -l 
+	- 压缩/解压缩
+		- tar -cvf xx.tar xx
+		- tar -xvf xx.tar
+		- tar -czvf xx.tar.gz xx
+		- tar -xzvf xx.tar.gz
 
 
 
