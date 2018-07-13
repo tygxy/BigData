@@ -57,8 +57,10 @@
 		- 复制一行 yy
 		- 粘贴 p
 	- 文件权限 rwx(4+2+1)
+		- chown -R immoc:immoc /data   // 递归将/data文件夹的数据用户组改为immoc
 	- grep查找关键字 
 		- grep -n "guoxingyu" test // 在test文件中查找guoxingyu，-n显示行号
+		- ps -ef | grep httpd  // 查看httpd服务有没有启动
 	- find 
 		- find . -name "*.txt"
 		- find /xx/xx -type f
@@ -68,16 +70,30 @@
 		- tar -cvf xx.tar xx
 		- tar -xvf xx.tar
 		- tar -czvf xx.tar.gz xx
-		- tar -xzvf xx.tar.gz
+		- tar -xzvf xx.tar.gzs
 
+- 系统用户操作命令
+	- 添加用户  useradd xxx
+	- 删除用户  userdel xxx
+	- 设置密码  passwd xxx
 
+- 防火墙设置
+	- 安装 yum install firewalld
+	- 启动 service firewalld start
+	- 检查状态 service firewalld status
 
+- 提权 sudo + command 
 
+- 文件传递 
+	-上传文件 scp [-P port] file root@ip:/path      
+	-下载到本地 scp [-P port] root@ip:/path/file  ./  
 
-
-
-
-
-
+## WebServer
+- Apache
+	- 安装 yum install httpd
+	- 启动 service httpd start
+	- 停止 service httpd stop
+	- 虚拟主机
+	- 伪静态
 
 
