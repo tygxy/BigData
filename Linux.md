@@ -155,8 +155,14 @@
 	- git clone XXX
 	- git remote -v  // 查看git的源，可以是github等
 	- git status
-	- git commit -am 'modify readme'
-
+	- git commit -am 'update linux'
+	- git push origin master  // master是分支，可以改成任意分支
+	- git fetch xx/xx // 拉取更新
+	- git rebase origin/master  // 与远程的Master合并
+	- git checkout -b feature_x  // 切换分支
+	- git pull  // 更新
+	- git merge <branch>
+	- git log
 
 
 
