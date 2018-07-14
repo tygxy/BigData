@@ -81,6 +81,7 @@
 	- 安装 yum install firewalld
 	- 启动 service firewalld start
 	- 检查状态 service firewalld status
+	- 关闭 service firewalld stop
 
 - 提权 sudo + command 
 
@@ -95,5 +96,77 @@
 	- 停止 service httpd stop
 	- 虚拟主机
 	- 伪静态
+
+- Nginx
+
+## Mysql
+
+- 下载源
+	- wget xxx
+	- yum localinstall xxx
+
+- 基本操作
+	- yum install mysql-community-server
+	- service mysqld start/restart/stop
+
+- 查看默认密码
+	- cat /var/log/mysqld.log | grep password
+
+- 登陆
+	- mysql -h127.0.0.1 -uroot -p
+
+- 开启远程连接
+	- 连接数据库
+	- use mysql
+	- update user set host = '%' where user = 'root' and host = 'localhost';  // 给某个User,IP开启所有IP均可以访问
+	- flush privileges
+	- 前提是防火墙需要关闭 sudo service firewalld stop
+
+- 添加用户和授权
+	- 连接数据库
+	- create user 'userName' @ '%' identified by 'passwd'; 
+	- 赋权
+		- grant all privileges on *.* to 'userName'@'%' identified by 'passwd' with grant option; // 赋予该账户所有库的权限 *.*就是所有库的所有表
+		- grant select,insert,update on *.* to 'userName'@'%' identified by 'passwd' with grant option; // 赋予查，插，更新权限
+		- revoke all privileges on *.* from 'userName'; // 收回权限
+	- flush privileges
+
+
+## Redis
+
+- 安装
+	- wget http://xxxx
+	- sudo yum install gcc
+	- make malloc=lib
+	- sudo make install
+
+- 启动
+	- ./src/redis-server 
+
+- 常见操作参考Redis
+
+## Git
+
+- 安装 yum install git
+
+- 添加公钥至github
+
+- 常见命令
+	- git clone XXX
+	- git remote -v  // 查看git的源，可以是github等
+	- git status
+	- git commit -am 'modify readme'
+
+
+
+
+
+
+
+
+
+
+
+
 
 
