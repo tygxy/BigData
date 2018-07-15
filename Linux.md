@@ -168,12 +168,41 @@
 	- git branch -d brachname 
 	- git merge <branch>  // 跟branch合并
 
+## Java
 
+- Java安装
+	- sudo yum -y install java-1.8.0-openjdk*
 
+- maven命令
+ 	- mvn compile // 编译
+ 	- mvn test
+ 	- mvn package 
+ 	- mvn clean // 删除target
+ 	- mvn install // 项目加入到本地仓库，就可以在pom中引入
 
+- 修改本地仓库地址
+	- 默认在/Users/guoxingyu/.m2/repository
+	- 修改/Users/guoxingyu/Documents/work/apache-maven-3.5.0/conf/settings.xml中的localRepository
 
+- pom常用元素
+	```
+	<dependencies>
+		<dependency>
+			<groupId></groupId>
+			<artifactId></artifactId>
+			<version></version>
+		</dependency>
+	</dependencies>
 
-
+	<build>
+		<!-- 插件列表>
+		<plugins>
+			<groupId></groupId>
+			<artifactId></artifactId>
+			<version></version>
+		</plugins>
+	</build>
+	```
 
 
 
