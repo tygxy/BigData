@@ -159,11 +159,14 @@
 	- git push origin master  // master是分支，可以改成任意分支
 	- git fetch xx/xx // 拉取更新
 	- git rebase origin/master  // 与远程的Master合并
-	- git checkout -b feature_x  // 切换分支
 	- git pull  // 更新
-	- git merge <branch>
 	- git log
-
+	- git reset head xxx // 取消已在缓存区的内容,即add的内容
+	- git rm -r xxx
+	- git branch brachname
+	- git checkout brachname  // 切换分支
+	- git branch -d brachname 
+	- git merge <branch>  // 跟branch合并
 
 
 
