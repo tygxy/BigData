@@ -148,11 +148,69 @@ object NetworkWordCount {
 
 - window窗口函数
 	- 窗口函数需要设置窗口长度和滑动距离，这两个值必须是DStreams的时间间隔的整数倍
-	- 
+	- code
+	```
+	object ForeachRDDApp {
+		  def main(args: Array[String]): Unit = {
+		    val sparkConf = new SparkConf().setMaster("local[2]").setAppName("ForeachRDDApp")
+		    val ssc = new StreamingContext(sparkConf,Seconds(5))
+
+		    val lines = ssc.socketTextStream("localhost",6789)
+		    val result = lines.flatMap(_.split(" ")).map((_,1))
+
+		    val windowedWordCount = result.reduceByKeyAndWindow((a:Int,b:Int) => (a+b),Seconds(30),Seconds(10))
+
+		    windowedWordCount.print()
+
+		    ssc.start()
+		    ssc.awaitTermination()
+		    }
+	}
+	```
+
+- join函数
+	- val joinedStream = stream1.leftOuterjoin(stream2)
 
 
+### 3.4 DStreams的输出
+
+- 输出到mysql
+```
+object ForeachRDDApp {
+  def main(args: Array[String]): Unit = {
+    val sparkConf = new SparkConf().setMaster("local[2]").setAppName("ForeachRDDApp")
+    val ssc = new StreamingContext(sparkConf,Seconds(5))
+
+    val lines = ssc.socketTextStream("localhost",6789)
+    val result = lines.flatMap(_.split(" ")).map((_,1))
 
 
+    result.foreachRDD(RDD => {
+      RDD.foreachPartition(partitionofRecords => {
+        val connection = createConnection()
+        partitionofRecords.foreach(record => {
+          val sql = "insert into wordcount(word, wordcount) values('" + record._1 + "'," + record._2 + ")"
+          connection.createStatement().execute(sql)
+        })
+        connection.close()
+      })
+    })
+
+
+    ssc.start()
+    ssc.awaitTermination()
+    }
+
+  /**
+    * 获取MySQL的连接
+    * @return
+    */
+  def createConnection() = {
+    DriverManager.getConnection("jdbc:mysql://localhost:3306/imooc_project?user=root&password=xxxxxx")
+  }
+}
+
+```
 
 
 
