@@ -45,6 +45,118 @@ val sc = new SparkContext(conf)
 
 ## 3. Spark Streaming
 
+### 3.1 快速上手实例，实时统计时间批次内的wordcount
+```
+import org.apache.spark.SparkConf
+import org.apache.spark.streaming.{Seconds, StreamingContext}
+
+
+object NetworkWordCount {
+
+  def main(args: Array[String]): Unit = {
+    val sparkConf = new SparkConf().setMaster("local[2]").setAppName("NetworkWordCount")
+    val ssc = new StreamingContext(sparkConf,Seconds(5))
+
+    val lines = ssc.socketTextStream("localhost",6789)
+    val result = lines.flatMap(_.split(" ")).map((_,1)).reduceByKey(_+_)
+    result.print()
+
+    ssc.start()
+    ssc.awaitTermination()
+  }
+}
+```
+### 3.2 高级数据源
+
+
+### 3.3 DStreams的算子
+
+- UpdateStateByKey
+	- 实现功能：针对是<K,V>的数据对，让每一个K维持一份state，并不断更新该stata。
+	- code
+	```
+	/**
+	  * Created by guoxingyu on 2018/1/22.
+	  * 统计截止目前为止的词频
+	  */
+	object StatefulWordCount {
+		  def main(args: Array[String]): Unit = {
+		    val sparkConf = new SparkConf().setMaster("local[2]").setAppName("StatefulWordCount")
+		    val ssc = new StreamingContext(sparkConf,Seconds(5))
+		    // 如果使用带状态的算子，必须设置Checkpoint
+		    // 在生产环境中，Checkpoint保存在HDFS中，这里是存到了本地路径中
+		    ssc.checkpoint(".")
+		    // ssc.checkpoint("hdfs://localhost:8020/worldcount_checkpoint") //生成环境参考
+
+		    val lines = ssc.socketTextStream("localhost",6789)
+		    val result = lines.flatMap(_.split(" ")).map((_,1))
+		    val state = result.updateStateByKey(updateFunction _)
+		    state.print()
+
+		    ssc.start()
+		    ssc.awaitTermination()
+		    }
+
+		  /**
+		    * 把当前的数据去更新已有的或者老的数据
+		    * @param currentValues
+		    * @param preValues
+		    * @return
+		    */
+		  def updateFunction(currentValues: Seq[Int], preValues: Option[Int]): Option[Int] = {
+		    val current = currentValues.sum  
+		    val pre = preValues.getOrElse(0)   
+
+		    Some(current + pre)
+
+		  }
+	}
+	```
+
+- transform
+	- 功能：实现RDD到RDD的任意操作
+	- code
+	```
+	/**
+	  * Created by guoxingyu on 2018/1/22.
+	  * 黑名单过滤
+	  * 输入数据比如1,ls则被过滤，2,hello就没有
+	  */
+	object TransformApp {
+		  def main(args: Array[String]): Unit = {
+		    val sparkConf = new SparkConf().setMaster("local[2]").setAppName("NetworkWordCount")
+		    val ssc = new StreamingContext(sparkConf,Seconds(5))
+
+		    // 构建黑名单
+		    val blacks = List("zs","ls")
+		    val blacksRDD = ssc.sparkContext.parallelize(blacks).map(x => (x,true))
+
+
+		    val lines = ssc.socketTextStream("localhost",6789)
+
+		    val clicklog = lines.map(x => (x.split(",")(1),x)).transform(rdd => {
+		      rdd.leftOuterJoin(blacksRDD).filter(x => x._2._2.getOrElse(false) != true).map(x=>x._2._1)
+		    })
+
+		    clicklog.print()
+
+		    ssc.start()
+		    ssc.awaitTermination()
+		  }
+	}
+	```
+
+- window窗口函数
+	- 窗口函数需要设置窗口长度和滑动距离，这两个值必须是DStreams的时间间隔的整数倍
+	- 
+
+
+
+
+
+
+
+
 ## 4. Spark SQL, DataFrames and Datasets Guide
 
 ### 4.1 概述
