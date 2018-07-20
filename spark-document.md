@@ -68,6 +68,68 @@ object NetworkWordCount {
 ```
 ### 3.2 高级数据源
 
+- kafka 0.8 版本
+	- 基于Receiver，可能会丢失数据，解决办法是Write Ahead Logs，这个日志会接受kafka来的数据入HDFS
+	```
+	object KafKaReceiverWordCount {
+	  def main(args: Array[String]): Unit = {
+	    if (args.length != 4) {
+	      System.err.println("Usage:KafKaReceiverWordCount <zkQuorum> <group> <topics> <numThreads>")
+	      System.exit(1)
+	    }
+	    val sparkConf = new SparkConf().setAppName("KafKaReceiverWordCount").setMaster("local[2]")
+	    val ssc = new StreamingContext(sparkConf,Seconds(5));
+	    val Array(zkQuorum,group,topics,numThreads) = args
+
+	    val topicMap = topics.split(",").map((_,numThreads.toInt)).toMap
+
+	    val messages = KafkaUtils.createStream(ssc, zkQuorum, group, topicMap)
+			
+		messages.map(_._2).flatMap(_.split(" ")).map((_,1)).reduceByKey(_+_).print()
+
+	    ssc.start()
+	    ssc.awaitTermination()
+	  }
+	}
+
+	```
+
+	- 直接接收，优点是建立kafka分区和RDD的一一对应，提高并行度；不需要Write Ahead Logs备份数据，交给了kafka；Offset不依赖zk,保存在checkpoint，保障Record只消费一次。
+	```
+	/**
+	  * Created by guoxingyu on 2018/1/23.
+	  * Spark Streaming对接Kafka方式二：Direct方式
+	  * 版本需要匹配，kafka的版本是0.8.2.2
+	  * localhost:9092 hello_topic,注意输入的参数是brokerlist
+	  */
+	object KafKaDirectWordCount {
+		  def main(args: Array[String]): Unit = {
+		    if (args.length != 2) {
+		      System.err.println("Usage:KafKaDirectWordCount <brokers> <topics>")
+		      System.exit(1)
+		    }
+		    val sparkConf = new SparkConf().setAppName("KafKaDirectWordCount").setMaster("local[2]")
+		    val ssc = new StreamingContext(sparkConf,Seconds(5));
+		    ssc.checkpoint(".")
+
+
+
+		    val Array(brokers,topics) = args
+		    val kafkaParams = Map[String,String]("metadata.broker.list" -> brokers,"group.id" -> "test")
+		    val topicsSet = topics.split(",").toSet
+
+		    val messages = KafkaUtils.createDirectStream[String,String,StringDecoder,StringDecoder](ssc,kafkaParams,topicsSet)
+
+		    messages.map(_._2).flatMap(_.split(" ")).map((_,1)).reduceByKey(_+_).print()
+
+
+		    ssc.start()
+		    ssc.awaitTermination()
+		  }
+		}
+
+	```
+
 
 ### 3.3 DStreams的算子
 
@@ -211,6 +273,52 @@ object ForeachRDDApp {
 }
 
 ```
+
+### 3.5 DStreams 的SQL解决方案
+```
+/**
+  * Created by guoxingyu on 2018/7/20.
+  * spark streaming 转换成DF，通过SQL命令操作
+  */
+object WordCountBySQL {
+  def main(args: Array[String]): Unit = {
+    val sparkConf = new SparkConf().setMaster("local[2]").setAppName("ForeachRDDApp")
+    val ssc = new StreamingContext(sparkConf,Seconds(5))
+
+    val lines = ssc.socketTextStream("localhost",6789)
+    val result = lines.flatMap(_.split(" "))
+
+    result.foreachRDD({ rdd =>
+      val spark = SparkSession.builder().config(rdd.sparkContext.getConf).getOrCreate()
+      import spark.implicits._
+
+      val wordsDataFrame = rdd.toDF("word")
+
+      wordsDataFrame.createOrReplaceTempView("words")
+
+      val wordCountsDataFrame = spark.sql("select word ,count(1) as total from words group by word")
+
+      wordCountsDataFrame.show()
+    })
+
+    ssc.start()
+    ssc.awaitTermination()
+  }
+}
+```
+
+### 3.6 checkpointing
+- 两种数据类型会被checkpoint，数据保存在HDFS中
+	- 元数据：包括conf,DStream的算子操作，为完成的批次
+	- 数据：一些有状态的RDD，比如有window，state之类的算子操作的RDD
+- 使用checkpoint的前提还有就是需要driver失败后自动重启，这部分需要在部署时配置
+- 业务逻辑需要写在functionToCreateContext函数，否则下次重启后报错
+- 修改业务逻辑代码后，需要删除HDFS文件中checkpoint开头的文件 hadoop fs -rm /xx/check_point/checkpoint*
+- checkpoint刷新时间是批处理时间间隔的5-10倍
+
+### 3.7 累加器和广播变量
+- 不可被checkpoint，解决办法是实例化，详情参看官网
+
 
 
 
