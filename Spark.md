@@ -689,6 +689,11 @@ flume-ng agent --name a1 --conf $FLUME_HOME/conf --conf-file $FLUME_HOME/conf/ex
 	</configuration>
 	```
 	- 配置conf/regionservers改为localhost
+	- hbase正常启动流程
+		- hadoop start-all.sh
+		- zk zkServer.sh start
+		- hbase start-hbase.sh
+	- 关闭顺序相反
 
 ## 4.Spark Streaming
 - 工作原理
