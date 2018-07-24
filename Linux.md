@@ -88,6 +88,9 @@
 - 文件传递 
 	-上传文件 scp [-P port] file root@ip:/path      
 	-下载到本地 scp [-P port] root@ip:/path/file  ./  
+- 其他
+	- jobs -l 查看进程
+	- ps -ef | grep xx
 
 ## WebServer
 - Apache
