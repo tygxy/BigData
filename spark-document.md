@@ -358,7 +358,7 @@ sqlDF.show()
 ```
 - 创建temporary views，在这个session结束后会消失，但是global temporary views表会在spark application结束才会消失
 - RDD转变为DataFrame的方法 ？？
-	- 反射推测Schema，利用反射来推断包含特定类型对象的RDD的schema
+	- 反射推测Schema，利用反射来推断包含特定类型对象的RDD的schema，参考实例https://blog.csdn.net/lxhandlbb/article/details/52367605
 	```
 	import spark.implicits._
 
