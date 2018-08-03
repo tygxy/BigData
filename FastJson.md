@@ -1,8 +1,35 @@
 # FastJson使用范例(Java、Scala版)
 
+## 0.目录
+
+- FastJson简介
+
+- FastJson三个核心类
+
+- Maven
+
+- Java API
+	- 反序列化
+		- 反序列化一个简单Json字符串
+		- 反序列化一个简单JSON字符串成Java对象组
+		- 反序列化一个复杂的JSON字符串
+	- 序列化
+	- 序列化和反序列化日期
+	- JsonObject的一些操作
+	- jsonArray的一些操作
+
+- Scala API
+	- 反序列化
+		- demo日志内容
+		- 反序列化简单json字符串
+		- 反序列化简单json字符串组
+			- String处理
+			- List处理
+	- 序列化
+
 ## 1. FastJson简介
 
-JSON协议在日常开发中很常用，包括前后端的数据接口，日志字段的保存等，通常都采用JSON协议。FastJson是阿里的开源框架，很好用，估计开发的同学都有使用过。这里做一个简单的用法总结，配一些demo。除了Java版本外，由于在Spark也经常清洗日志，所以配上了Scala版本，方便日后查询使用。代码可以参考github:
+JSON协议在日常开发中很常用，包括前后端的数据接口，日志字段的保存等，通常都采用JSON协议。FastJson是阿里的开源框架，很好用，估计开发的同学都有使用过。这里做一个简单的用法总结，配一些demo。除了Java版本外，由于在Spark也经常清洗日志，所以配上了Scala版本，方便日后查询使用。完整代码可以参考Github:https://github.com/tygxy/BigData
 
 ## 2. FastJson三个核心类
 - JSON：fastjson的解析器，用于json字符串和javaBean、Json对象的转换
