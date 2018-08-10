@@ -16,8 +16,24 @@
 2. kafka多主题多线程消费者
 	- 基本使用，配置broker、consumer group、topic list、num of threads
 
-3. Hadoop FS 
+3. Hadoop FS Standalone
 	- 基本使用
+
+4. JDBC
+	- 首先安装jdbc driver
+	- 基本使用，配置connection、SQL query、username、password、jdbc driver
+	- 可以通过在where语句中设置指定列(offset column)的指定值(offset value)开始读取数据，比如从主键id大于10000的记录开始读取
+	- 两种查询模式
+		- 增量 从设置好的initial offset value开始读，会按一定的时间批次对append的数据自动更新，适用于append_only的场景，需要写明where和order by
+		```
+		select * from <tableName> where <offset column> > ${OFFSET} order by <offset column>
+		```
+		- 全量 会在时间间隔后重复执行query，会捕捉所有行的变化，不适合大规模的表，可以选择offset column和offset value
+		```
+		select * from <tableName>
+		```
+
+
 
 ## 操作
 
