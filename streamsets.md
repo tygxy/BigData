@@ -17,7 +17,16 @@
 	- 基本使用，配置broker、consumer group、topic list、num of threads
 
 3. Hadoop FS Standalone
-	- 基本使用
+	- 基本使用，配置Hadoop URI、File Directory、num of threads、File name parttern、File name parttern mode、read order等
+	- 配置时要明确指明文件路径、文件名模式、文件名匹配模式、读取顺序
+		- 文件名匹配模式有两种，glob mode(形如*.json)和正则表达式
+		- 文件名模式，例如.json、.txt等
+		- 读取顺序
+			- Last Modified Timestamp,按照文件的最后修改时间的升序次序读取数据，而且是嵌套读取子目录的内容
+			- Lexicographically Ascending File Names，按照文件名的字母升序读取数据
+	- 多线程处理，一个线程建立一个pipeline实例，并行处理数据
+	- 可以指定处理的第一份文件名称，那么之前的文件就不会处理了
+	- Buffer Limit指定每条记录的大小，如果记录大于这个限制，会按该条信息error处理
 
 4. JDBC
 	- 首先安装jdbc driver
@@ -33,9 +42,9 @@
 		select * from <tableName>
 		```
 
-
-
 ## 操作
+
+1.
 
 ## 输出地
 
