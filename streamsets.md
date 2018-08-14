@@ -44,7 +44,17 @@
 
 ## 操作
 
-1.
+1.Field Master 给指定字符串字段加密，可以选择Mast的类型
+2.Stream Selector 对数据流做分流处理
+3.Field Merger 支持数据合并，但只支持map、List结构的数据
+4.Aggregator 在一段时间间隔内做聚合指标，比如sum、avg、max、min等
+5.Delay 延迟一段时间
+6.Field Flattener 拆分map、List结构的数据成没有嵌套的数据结构
+7.Field Hasher 对指定字段进行encode,策略
+
+
+
+
 
 ## 输出地
 
