@@ -1,6 +1,23 @@
 # Streamsets
 
+最近在调研Streamsets，只搞明白了一些最简单的Demo应用。由于网络上相关资料非常少，做个简单的记录。
+
 ## 简介
+
+Streamsets是一款大数据实时采集和ETL工具，可以实现不写一行代码完成数据的采集和流转。通过拖拽式的可视化界面，实现数据管道(Pipelines)的设计和定时任务调度。最大的特点有：
+	- 可视化界面操作，不写代码完成数据的采集和流转
+	- 内置监控，可是实时查看数据流传输的基本信息和数据的质量
+	- 强大的整合力，对现有常用组件全力支持，包括50种数据源、44种数据操作、46种目的地。
+
+对于Streamsets来说，最重要的概念就是数据源(Origins)、操作(Processors)、目的地(Destinations)。创建一个Pipelines管道配置也基本是这三个方面。
+
+常见的Origins有Kafka、HTTP、UDP、JDBC、HDFS等；Processors可以实现对每个字段的过滤、更改、编码、聚合等操作；Destinations跟Origins差不多，可以写入Kafka、Flume、JDBC、HDFS、Redis等。
+
+## 基本安装和基本操作 
+
+查看https://cloud.tencent.com/developer/article/1078852
+
+目前网上的中文资料中，也就这个专题介绍的比较详细，几个常用组件的配置介绍的还可以，我也是按照这个入门的。
 
 ## 数据源
 
@@ -52,13 +69,31 @@
 6.Field Flattener 拆分map、List结构的数据成没有嵌套的数据结构
 7.Field Hasher 对指定字段进行encode,策略
 
+## 目的地
 
+基本配置跟数据源差不多。
 
+## 一个简单的Demo 
 
+实现kafka读入数据，Stream Selector对数据流做分流，再各自写入到kafka不同的topic中。
 
-## 输出地
+- 整体架构
+![](/resource/Streamsets1.PNG?raw=true)
 
-## 实例
+- 配置数据源
+	- 配置kafka consumer的基本信息,包括broker、zk、topic、consumer group
+	![](/resource/Streamsets2.jpg?raw=true)
+	- 配置Data格式，这里选择的是json格式
+	![](/resource/Streamsets3.PNG?raw=true)
+
+- 配置操作
+	- 配置Stream Selector，数据根据Version字段分为两类
+	![](/resource/Streamsets4.PNG?raw=true)
+
+- 配置目的地
+	- 继续配置kafka producer
+	![](/resource/Streamsets5.jpg?raw=true)
+
 
 ## 参考内容
 - https://streamsets.com/
