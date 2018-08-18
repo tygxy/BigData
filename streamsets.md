@@ -94,7 +94,6 @@ Streamsets是一款大数据实时采集和ETL工具，可以实现不写一行�
 	- 继续配置kafka producer
 	![](/resource/Streamsets5.jpg?raw=true)
 
-
 ## 参考内容
 - https://streamsets.com/
 - https://cloud.tencent.com/developer/column/2264/tag-2448
