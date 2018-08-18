@@ -1,0 +1,27 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <relativePath>3deps.xml</relativePath>
+        <groupId>com.bupt.hbase</groupId>
+        <artifactId>deps</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
+    <groupId>com.bupt.hbase</groupId>
+    <artifactId>resources</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+
+    <!--配置依赖相关-->
+    <build>
+        <sourceDirectory>src/main/scala</sourceDirectory>
+        <testSourceDirectory>src/test/scala</testSourceDirectory>
+
+        <resources>
+        </resources>
+    </build>
+
+</project>

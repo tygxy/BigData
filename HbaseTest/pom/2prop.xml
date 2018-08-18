@@ -1,0 +1,28 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <relativePath>1repo.xml</relativePath>
+        <groupId>com.bupt.hbase</groupId>
+        <artifactId>maven-repo</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
+    <groupId>com.bupt.hbase</groupId>
+    <artifactId>prop</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+
+    <!--配置版本信息相关-->
+    <properties>
+        <scala.version.prefix>2.11</scala.version.prefix>
+        <scala.version>${scala.version.prefix}.8</scala.version>
+        <spark.version>2.1.2</spark.version>
+        <kafka.version>0.8.2.2</kafka.version>
+        <hadoop.version>2.6.0-cdh5.7.0</hadoop.version>
+        <hbase.version>1.2.0-cdh5.7.0</hbase.version>
+    </properties>
+
+</project>
