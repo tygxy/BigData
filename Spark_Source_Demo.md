@@ -35,7 +35,10 @@ Spark经常会读写一些外部数据源，常见的有HDFS、HBase、JDBC、Re
 </dependencies>
 ```
 
-### 1.2 HBaseUtils
+### 1.2 Project结构
+
+
+### 1.3 HBaseUtils
 ```
 package com.bupt.Hbase
 
@@ -87,7 +90,7 @@ object HBaseUtils {
 }
 ```
 
-### 1.3 Spark读HBase
+### 1.4 Spark读HBase
 ```
 package com.bupt.Hbase
 
@@ -133,7 +136,7 @@ object HBaseReadTest {
 }
 ```
 
-### 1.4 Spark写HBase
+### 1.5 Spark写HBase
 
 - 通过Put每次写一条
 ```
@@ -301,8 +304,209 @@ object HBaseWriteTest2 {
 }
 ```
 
-### 1.5 参考
+### 1.6 参考
 - https://blog.csdn.net/qq_25954159/article/details/52848947?locationNum=12&fps=1
 - https://www.iteblog.com/archives/1891.html
 - https://www.iteblog.com/archives/1889.html
 - https://blog.csdn.net/gpwner/article/details/73530134
+
+
+
+
+## 2.Spark读写JDBC
+
+### 2.1 maven依赖
+```
+<dependency>
+    <groupId>mysql</groupId>
+    <artifactId>mysql-connector-java</artifactId>
+    <version>5.1.30</version>
+</dependency>
+
+```
+
+### 2.2 Project结构
+
+基本按照Java经典的DAO模式组织
+![](/resource/spark_jdbc.jpg?raw=true)
+
+### 2.3 MySQLUtils 
+
+```
+package com.bupt.jdbc.Utils
+
+import java.sql.{Connection, DriverManager, PreparedStatement}
+
+/**
+  * Created by guoxingyu on 2018/8/22.
+  * MySQL工具类
+  */
+
+object MySQLUtils {
+  /**
+    * 获取MySQL链接
+    */
+  def getConnection() = {
+    DriverManager.getConnection("jdbc:mysql://localhost:3306/guoxingyutest?user=root&password=302313")
+  }
+
+  /**
+    * 释放数据库等资源
+    * @param connection
+    * @param pstmt
+    */
+  def release(connection:Connection, pstmt:PreparedStatement) = {
+    try {
+      if (pstmt != null) {
+        pstmt.close()
+      }
+    } catch {
+      case e : Exception => e.printStackTrace()
+    } finally {
+      if (connection != null) {
+        connection.close()
+      }
+    }
+  }
+
+}
+```
+### 2.4 RDD2Mysql
+
+- 首先构造Bean
+```
+package com.bupt.jdbc.Bean
+
+/**
+  * Created by guoxingyu on 2018/8/22.
+  */
+case class UserInfoAccess (userName:String,age:Int)
+
+``` 
+
+- 其次写DAO
+```
+package com.bupt.jdbc.DAO
+
+import com.bupt.jdbc.Bean.UserInfoAccess
+import java.sql.{Connection, PreparedStatement}
+import com.bupt.jdbc.Utils.MySQLUtils
+import com.mysql.jdbc.Statement
+
+import scala.collection.mutable.ListBuffer
+/**
+  * Created by guoxingyu on 2018/8/22.
+  */
+object StatDAO {
+
+  /**
+    * 批量保存到数据库userInfo
+    * @param list
+    */
+  def insertUserInfo(list: ListBuffer[UserInfoAccess]) = {
+    var connection : Connection = null
+    var pstmt : PreparedStatement = null
+
+    // 插入新数据
+    try {
+      connection = MySQLUtils.getConnection()
+      val sql = "insert into guoxingyutest.userInfo(user_name,age) values (?,?)"
+      pstmt = connection.prepareStatement(sql)
+      connection.setAutoCommit(false) // 设置手动提交
+
+      for (ele <- list) {
+        pstmt.setString(1, ele.userName)
+        pstmt.setInt(2, ele.age)
+
+        pstmt.addBatch()
+      }
+
+      pstmt.executeBatch()
+      connection.commit()
+    } catch {
+      case e : Exception => e.printStackTrace()
+    } finally {
+      MySQLUtils.release(connection,pstmt)
+    }
+  }
+
+  /**
+    * 删除数据
+    * @param id
+    */
+  def deleteUserInfo(id:Int) = {
+    var connection : Connection = null
+    var pstmt : PreparedStatement = null
+
+    try {
+      connection = MySQLUtils.getConnection()
+      val sql_del = "delete from guoxingyutest.userInfo where id = ?"
+      pstmt = connection.prepareStatement(sql_del)
+
+      pstmt.setInt(1,id)
+      pstmt.executeUpdate() > 0
+    } catch {
+      case e : Exception => e.printStackTrace()
+    } finally {
+      MySQLUtils.release(connection,pstmt)
+    }
+  }
+
+}
+```
+
+- 最后在RDD中使用
+```
+package com.bupt.jdbc
+
+import com.bupt.jdbc.Bean.UserInfoAccess
+import com.bupt.jdbc.DAO.StatDAO
+import org.apache.spark.sql.SparkSession
+
+import scala.collection.mutable.ListBuffer
+
+/**
+  * Created by guoxingyu on 2018/8/22.
+  */
+
+object JDBCTest {
+  def main(args: Array[String]): Unit = {
+
+    val spark = SparkSession.builder().appName("JDBCTest").master("local[2]").getOrCreate()
+
+    val data = spark.sparkContext.makeRDD(List("tom,23","bob,24"))
+
+    // 删除数据
+    try {
+      StatDAO.deleteUserInfo(1)
+    } catch {
+      case e : Exception => e.printStackTrace()
+    }
+
+
+    // 数据存入MySQL数据库
+    try {
+      data.foreachPartition(partitionOfRecords => {
+        val list = new ListBuffer[UserInfoAccess]
+        partitionOfRecords.foreach(info => {
+          val arr = info.split(",")
+          val userName = arr(0)
+          val age = arr(1).toInt
+
+          list.append(UserInfoAccess(userName,age))
+        })
+        StatDAO.insertUserInfo(list)
+      })
+    } catch {
+      case e : Exception => e.printStackTrace()
+    }
+
+    spark.close()
+  }
+}
+```
+
+
+
+
+
