@@ -309,6 +309,8 @@ object HBaseWriteTest2 {
 - https://www.iteblog.com/archives/1891.html
 - https://www.iteblog.com/archives/1889.html
 - https://blog.csdn.net/gpwner/article/details/73530134
+- http://www.cnblogs.com/yanzibuaa/p/7521668.html
+- https://www.jianshu.com/p/b6c5a5ba30af
 
 
 

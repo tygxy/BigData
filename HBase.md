@@ -69,11 +69,21 @@ HBase基本体系架构就是这样，从宏观上理解：Client作为API接口
 
 ## 4.Region寻址
 
+### 0.94-版本
+
 ![](/resource/hbase6.jpg?raw=true)
 
 HBase通过三级索引结果实现Region的寻址。我们逆序描述这个设计的思路，HBase的所有数据Region元数据被存储在.META.表中，但是随着Region增多，显然.META.会越大越大，最终也会分裂成多个Region；-ROOT-表实现定位.META.表的Region的位置，保存.META.表中所有Region的元数据。而且-ROOT-不会分裂，只有一个region。Zookeeper会记录-ROOT-表的位置信息。
 
 我们在正序描述寻址过程，Client通过ZK找到-ROOT-表的位置，通过-ROOT-表查找到.META.的位置，再从.META.查找用户Region的位置。可以实现最多三次跳转就可以定位任意一个Region的效果。为了加快访问速度，.META.表的所有Region全部保存在内存中。客户端会将查询过的位置信息缓存起来，且缓存不会主动失效。
+
+
+### 0.96+版本
+
+hbase0.96版本后就去掉了-ROOT-表，改为了
+
+
+
 
 ## 5.HBase读写过程
 
@@ -102,3 +112,5 @@ HBase通过三级索引结果实现Region的寻址。我们逆序描述这个设
 - https://www.cnblogs.com/csyuan/p/6543018.html
 - https://www.jianshu.com/p/20aff7d85e95
 - https://blog.csdn.net/wypersist/article/details/80115123
+- https://www.cnblogs.com/yanzibuaa/p/7521668.html
+- https://www.cnblogs.com/duanxz/p/3154487.html
