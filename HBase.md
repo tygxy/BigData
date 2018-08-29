@@ -80,9 +80,24 @@ HBase通过三级索引结果实现Region的寻址。我们逆序描述这个设
 
 ### 0.96+版本
 
-hbase0.96版本后就去掉了-ROOT-表，改为了
 
+hbase0.96版本后就去掉了-ROOT-表，也放弃了原先三级索引的设计结构。原因是在实际集群运行中，两级索引已经满足需求了，所以去掉了-ROOT-表。
 
+0.96+的版本将原先的.META.表改名为hbase:meta，其结构示意图如图所示
+
+![](/resource/hbase8.jpg?raw=true)
+
+rowKey的格式为<表名,startRowkey,创建时间时间戳+"."+encode值+".">，列族为info，总共有4列，图上已经写的很清楚了。其中startKey是region开始的key，第一个region的startKey是空字符串；endKey，region的结束key，最后一个region的endKey是空字符串；encode值，该值会作为hdfs文件系统的一个目录；address保存Region的位置。
+
+![](/resource/hbase11.jpg?raw=true)
+
+![](/resource/hbase10.jpg?raw=true)
+
+所以0.96+的版本的寻址过程可以表述为
+
+![](/resource/hbase12.jpg?raw=true)
+
+这个就分三步，Client联系ZK寻址.META.表的位置，再从.META.表读取数据的Region位置信息，最后从指定Region读取数据
 
 
 ## 5.HBase读写过程
@@ -114,3 +129,4 @@ hbase0.96版本后就去掉了-ROOT-表，改为了
 - https://blog.csdn.net/wypersist/article/details/80115123
 - https://www.cnblogs.com/yanzibuaa/p/7521668.html
 - https://www.cnblogs.com/duanxz/p/3154487.html
+- https://www.jianshu.com/p/73842541f566
