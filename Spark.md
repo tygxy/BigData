@@ -596,6 +596,7 @@ flume-ng agent --name a1 --conf $FLUME_HOME/conf --conf-file $FLUME_HOME/conf/ex
 	- 查看topic(zk)  kafka-topics.sh --list --zookeeper localhost:2181
 	- 发送消息(broker)  kafka-console-producer.sh --broker-list localhost:9092 --topic hello_topic
 	- 消费消息(zk)  kafka-console-consumer.sh --zookeeper localhost:2181 --topic hello_topic 
+		- 2.0+版本：kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic test --from-beginning
 	
 - Flume+kafka整合
 	- 启动zookeeper  bin/zkServer.sh start 
