@@ -13,6 +13,7 @@
 ## [11. StreamSets](https://github.com/tygxy/BigData/blob/master/streamsets.md)
 ## [12. Spark_Source_Demo](https://github.com/tygxy/BigData/blob/master/Spark_Source_Demo.md)
 ## [13. HBase](https://github.com/tygxy/BigData/blob/master/HBase.md)
+## [14. Kafka Offset](https://github.com/tygxy/BigData/blob/master/Streaming_Kafka_Offset.md)
 
 
 # Demo
