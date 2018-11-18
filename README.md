@@ -47,3 +47,7 @@
 ## HbaseTest
 
 - Spark读写HBase
+
+## StreamingTest
+
+- Streaming+kafka 管管理offset的几种方式
