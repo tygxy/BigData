@@ -19,7 +19,7 @@ Spark Streaming读取kafka数据源发来的json格式的数据流，在批次�
 
 ### 2.1 组件安装
 
-首先需要安装必要的大数据组件，安装的版本信息如下，安装方法自行百度
+首先需要安装必要的大数据组件，安装的版本信息如下：
 	- Spark 2.1.2
 	- kafka 0.10.0.1
 	- HBase 1.2.0
@@ -62,7 +62,15 @@ Spark Streaming读取kafka数据源发来的json格式的数据流，在批次�
 
 ### 3.2 主函数
 
+初始化spark，和一些配置信息的读取，通过KafkaUtils.createDirectStream读取kafka数据
+
 ![](/resource/streamingDemo_code1.jpg?raw=true)
+
+完成如下几个操作
+	- 清洗和筛选数据，返回(id,ScoreBean)的RDD
+	- 构造id List集合，批量从Hbase查询结果，构造(id,studentJsonStr)的resMap集合,方便后续O(1)查询
+	- 遍历每条数据，从resMap查到结果，合并出新的Java Bean
+	- Java Bean to Json String，并写入到kafka 
 
 ![](/resource/streamingDemo_code2.jpg?raw=true)
 
@@ -77,8 +85,9 @@ Spark Streaming读取kafka数据源发来的json格式的数据流，在批次�
 
 ![](/resource/streamingDemo_outputTopic.jpg?raw=true)
 
+## 5.总结
 
-
+通过这个小项目，希望大家可以掌握基本的Spark Streaming流处理操作，包括读写kafka，查询hbase，spark streaming Dstream操作。详细代码请参阅github:
 
 
 
