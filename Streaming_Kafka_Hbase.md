@@ -87,7 +87,7 @@ Spark Streaming读取kafka数据源发来的json格式的数据流，在批次�
 
 ## 5.总结
 
-通过这个小项目，希望大家可以掌握基本的Spark Streaming流处理操作，包括读写kafka，查询hbase，spark streaming Dstream操作。详细代码请参阅github:
+通过这个小项目，希望大家可以掌握基本的Spark Streaming流处理操作，包括读写kafka，查询hbase，spark streaming Dstream操作。详细代码请参阅https://github.com/tygxy/StreamingDemo
 
 
 
