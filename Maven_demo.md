@@ -26,7 +26,7 @@
 ```
 但是注意这个mirrorOf会覆盖掉所有，包括你在pom.xml里面定义的repository。
 
-###pom.xml详解
+### pom.xml详解
 #### pom.xml的开头
 ```
 <?xml version="1.0" encoding="UTF-8"?>
