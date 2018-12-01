@@ -17,18 +17,21 @@
 ## 第五章 kafka基本操作实战
 - 启动kafka单个节点
 	- 启动zk bin/zkServer.sh start  登陆到zk: bin/zkCli.sh -server 127.0.0.1:2181
-	- 启动kafka bin/kafka-server-start.sh $KAFKA_HOME/config/server.properties
-	- 关闭kafka bin/kafka-server-stop.sh 
+	- 启动kafka bin/kafka-server-start.sh [-daemon] $KAFKA_HOME/config/server.properties -daemon是后台启动的可选项
+	- 关闭kafka bin/kafka-server-stop.sh
 - 操作主题
-	- 创建主题 kafka-topics.sh --create --zookeeper server-1:2181,server-2:2181,server-3:2181
---replication-factor 2 --partitions 3 --topic kafka-action
-	- 查看主题信息 
-		- kafka-topics --list --zookeeper server-1 :2181, server-2:2181
-		- kafka-topics.sh --describe --zookeeper server-1:2181,server-2:2181 --topic streamingtopic
+    + 创建单个节点下的主题 kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic test
+	- 创建多节点下的主题 kafka-topics.sh --create --zookeeper server-1:2181,server-2:2181,server-3:2181
+--replication-factor 2 --partitions 3 --topic kafka-action(多节点的kafka需要在zookeeper-zoo.cfg中配置)
+	- 查看主题信息
+        - kafka-topics.sh --list --zookeeper localhost:2181  列出当前端口的主题
+		- kafka-topics.sh --list --zookeeper server-1 :2181, server-2:2181
+		- kafka-topics.sh --describe --zookeeper server-1:2181,server-2:2181 --topic streamingtopic 列出指定主题的信息
 	- 删除主题 kafka-topics --delete --zookeeper server-1:2181,server-2:2181  kafka-action
 - 生产者基本操作
 	- 启动生产者  kafka-console-producer.sh --broker-list localhost:9092 --topic hello_topic
 - 消费者基础操作
+    + 简单单节点 kafka-console-consumer.sh --zookeeper localhost:2181 --topic test --from-beginning
 	- 启动旧版消费者 ./kafka-console-consurner.sh --zookeeper server-1:2181,server-2:2181,server-2:2181 --topic kafka-action --consumer-property group.id=old-consumer-test --consumer-property consumer.id=old- consumer-cl --from-beginning --delete-consumer-offsets
 		- consumer-property参数设置消费者组、消费者名称等信息
 		- from-beginning 旧版消费者只能从头或者从最新开始消费，不支持指定偏移量消费
