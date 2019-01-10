@@ -350,10 +350,41 @@ public class Log4jProducer {
     agent.sinks.hdfsSink.hdfs.threadsPoolSize=15
     ```
 
+# 《Apache Kafka 实战》
 
+## 1. 认识Apache Kafka
 
+### 1.2 消息引擎系统概述
+    - 经典的引擎系统需要考虑两个方面：消息的设计、传输协议的设计
+    - 消息的设计一般以结构化形式呈现，比如xml，json等
+    - 消息引擎范型包括：消息队列模型和发表/订阅模型
+        - 消息队列模型：定义消费队列、发送者、接受者，采用P2P方式，发送者发送到指定队列，接受者从该队列消费，消费后队列删除该消息；发/接一一对应关系。
 
+### 1.3 Kafka概要设计
+    - Kafka需要在设计是满足以下四个要求
+    - 高吞吐量/低延迟
+        - 大量使用操作系统页缓存，内存操作速度快且命中率高
+        - Kafka不直接参与物理IO操作，交给擅长此事的操作系统完成
+        - 使用追加的写入方式，避免磁盘随机读写操作
+        - 使用sendfile为代表的零拷贝技术加强网络间数据传输效率
+    - 消息持久化
+        - 目的是消息的发送和接受的解耦、实现灵活的消息消费
+        - Kafka是数据立即写入文件系统的持久化日志中，节省内存给页缓存。（？跟写入页缓存有矛盾吧）
+    - 负载均衡和故障转移
+        - 负载均衡：智能化分区领导者选举策略
+        - 故障转移：会话机制。Kafka服务器以会话形式注册到zookeeper
+    - 伸缩性
+        - 依赖zk保存Kafka每台服务器的状态，方便扩容
 
+### 1.4 Kafka基本术语
+    - 消息：
+        - 消息的格式对于普通用户需要知道：Key,Value,TimeStamp
+        - 消息使用二进制数组ByteBuffer保存数据，极大节约内存
+    - topic，partition，offset(此offset是消息在partition分配的位移值，用于唯一确定消息在partition的位置)
+    - 消费者offset
+    - replica 
+    - leader和follower，只有leader对外提供服务
+    - ISR，与leader replica保持同步的replica集合
 
 
 
