@@ -387,4 +387,34 @@ public class Log4jProducer {
     - ISR，与leader replica保持同步的replica集合
 
 
+## 4. Producer开发
+ 
+### 4.1 Producer概述
+- producer工作流程：
+    - producer用一个线程将消息封装在ProducerRecord类实例，序列化后发给partitioner
+    - partitioner根据多种分区策略确定分区，并根据多种策略确定分区的leader，发至内存缓存区
+    - producer中另外一个线程(IO发送线程),从缓存区中提取消息并组建出一个batch,统一发给对应的broker
+
+### 4.2 构造producer
+- 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
