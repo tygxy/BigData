@@ -396,7 +396,56 @@ public class Log4jProducer {
     - producer中另外一个线程(IO发送线程),从缓存区中提取消息并组建出一个batch,统一发给对应的broker
 
 ### 4.2 构造producer
-- 
+- Java版实例
+```
+```
+    - 五个步骤
+        - 构造Properties对象，指定必要的参数包括bootstrap.servers，key.serializer，value.serializer
+        - 构造KafkaProducer对象
+        - 构造ProducerRecord对象，必须指定的参数有topic,value
+        - 调用KafkaProducer的send，有两个方式发送：同步发送和异步发送+回调
+        - 关闭KafkaProducer
+- Producer主要参数
+    - acks 
+    - buffer.memory
+    - compression.type
+    - retries
+    - batch.size
+    - linger.ms
+    - max.request.size
+    - request.timeout.ms
+
+### 4.3 消息分区机制
+- 默认分区策略
+    - 指定key时，使用murmur2算法计算哈希值，对总分区数求模后找到目标分区号完成分配，相同的key的所有消息分配到相同的分区
+    - 没有指定key时，partitioner根据轮询的方式确保所有分区均匀
+- 自定义分区机制
+    - 创建一个类，实现Partitioner接口
+    - 在Properties对象中设置partitioner.class参数
+- 实例
+
+### 4.4 消息序列化
+- 默认序列化器
+- 自定义序列化
+    - 定义数据对象格式
+    - 创建自定义序列化类
+    - 在Properties对象中设置参数
+- 实例
+
+### 4.5 producer拦截器
+- 作用：interceptor(拦截器)使得用户在消息发送前以及producer回调逻辑前有机会对消息做定制化需求，比如修改
+- 接口ProducerInterceptor的方法有
+    - onSend，运行在用户主线程，在消息被序列化以计算分区前调用该方法
+    - onAcknowledgement，运行在I/O线程中，该方法在消息被应答之前或消息发送失败时调用，通常是producer回调逻辑触发前
+    - close
+- 实例
+
+### 4.6 无消息丢失配置
+- 通过一些参数的配置，解决I/O线程发送之前producer崩溃，存储缓冲区消息全部丢失的问题；和消息乱序的问题
+
+### 4.7 消息压缩
+- LZ4压缩支持的最好
+- 压缩取决于I/O资源消耗与CPU资源消耗对比，如果网络带宽不够或者broker磁盘占用率高，而producer端CPU资源丰富，可以选择压缩。
 
 
 
